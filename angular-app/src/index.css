@@ -1,0 +1,367 @@
+@import url('https://fonts.googleapis.com/css2?family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&family=Inter:wght@300;400;500;600;700&display=swap');
+
+:root {
+    /* Paleta Zen: Seda, Luz y Aire */
+    --accent: #1e1e1e;
+    /* Negro profundo para contraste elegante */
+    --accent-soft: rgba(30, 30, 30, 0.05);
+
+    /* Gradiente de fondo profesional y suave */
+    --bg-zen: linear-gradient(135deg, #fdfbfb 0%, #ebedee 100%);
+    --surface-zen: rgba(255, 255, 255, 0.95);
+
+    --text-primary: #1a1a1a;
+    --text-secondary: #5a5a5a;
+    --text-muted: #9a9a9a;
+
+    --border-hairline: 1px solid rgba(0, 0, 0, 0.06);
+
+    /* Espaciado Maestro Zen */
+    --master-gap: 5rem;
+    /* Espacio masivo entre bloques de carga */
+    --label-input-gap: 1.5rem;
+    /* Espacio real entre título y entrada */
+
+    --radius-luxe: 24px;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    -webkit-font-smoothing: antialiased;
+}
+
+body {
+    font-family: 'Inter', sans-serif;
+    background: var(--bg-zen);
+    background-attachment: fixed;
+    color: var(--text-primary);
+    line-height: 1.8;
+    /* Interlineado generoso */
+    padding: 8rem 1.5rem;
+    /* Mucho aire arriba y abajo */
+    overflow-x: hidden;
+}
+
+h1,
+.serif-font {
+    font-family: 'Libre Baskerville', serif;
+    letter-spacing: -0.01em;
+}
+
+/* Contenedor Único Centrado */
+.zen-wrapper {
+    max-width: 650px;
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+}
+
+header {
+    text-align: center;
+    margin-bottom: 7rem;
+}
+
+header h1 {
+    font-size: 3.5rem;
+    font-weight: 400;
+    margin-bottom: 1rem;
+    color: var(--text-primary);
+}
+
+header p {
+    font-size: 1.1rem;
+    color: var(--text-secondary);
+    font-style: italic;
+    opacity: 0.7;
+}
+
+/* El Formulario Zen */
+.zen-form-container {
+    background: var(--surface-zen);
+    border-radius: var(--radius-luxe);
+    padding: 5rem 4rem;
+    box-shadow: 0 40px 100px rgba(0, 0, 0, 0.03);
+    border: var(--border-hairline);
+    margin-bottom: 10rem;
+    backdrop-filter: blur(10px);
+}
+
+.zen-form {
+    display: flex;
+    flex-direction: column;
+    gap: var(--master-gap);
+    /* Espaciado máximo aprobado */
+}
+
+.input-group {
+    display: flex;
+    flex-direction: column;
+    gap: var(--label-input-gap);
+    transition: transform 0.3s ease;
+}
+
+.input-group:focus-within {
+    transform: translateX(5px);
+}
+
+label {
+    font-size: 0.8rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.15em;
+    color: var(--text-muted);
+    padding-left: 2px;
+}
+
+.zen-input {
+    width: 100%;
+    padding: 1.25rem 0;
+    background: transparent;
+    border: none;
+    border-bottom: 1px solid #ddd;
+    font-family: inherit;
+    font-size: 1.4rem;
+    /* Letra grande y clara */
+    color: var(--text-primary);
+    outline: none;
+    border-radius: 0;
+    transition: border-bottom-color 0.4s;
+}
+
+.zen-input:focus {
+    border-bottom-color: var(--accent);
+}
+
+.zen-input::placeholder {
+    color: #e0e0e0;
+}
+
+/* ISBN con integración */
+.isbn-field {
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+}
+
+.btn-zen-sync {
+    background: var(--accent);
+    color: white;
+    border: none;
+    width: 45px;
+    height: 45px;
+    border-radius: 50%;
+    cursor: pointer;
+    font-size: 1.1rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s ease;
+}
+
+.btn-zen-sync:hover {
+    transform: rotate(90deg);
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+}
+
+/* Grid para campos secundarios */
+.zen-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 4rem;
+}
+
+.zen-checkbox {
+    display: flex;
+    align-items: center;
+    gap: 1.2rem;
+    height: 100%;
+}
+
+input[type="checkbox"] {
+    width: 22px;
+    height: 22px;
+    accent-color: var(--accent);
+    cursor: pointer;
+}
+
+.btn-zen-action {
+    background: var(--accent);
+    color: white;
+    border: none;
+    padding: 1.5rem;
+    border-radius: var(--radius-luxe);
+    font-size: 1.1rem;
+    font-weight: 600;
+    cursor: pointer;
+    margin-top: 1.5rem;
+    transition: all 0.3s ease;
+}
+
+.btn-zen-action:hover {
+    filter: invert(1);
+    transform: scale(1.02);
+}
+
+/* Listado Minimalista */
+.collection-zen {
+    display: flex;
+    flex-direction: column;
+    gap: 4rem;
+}
+
+.collection-zen h2 {
+    font-size: 2.5rem;
+    font-weight: 400;
+    text-align: center;
+    margin-bottom: 2rem;
+}
+
+.search-zen {
+    width: 100%;
+    max-width: 300px;
+    margin: 0 auto 5rem;
+    padding: 1rem;
+    border: none;
+    background: transparent;
+    border-bottom: 1px solid #ddd;
+    font-family: inherit;
+    font-size: 1.1rem;
+    text-align: center;
+    outline: none;
+}
+
+.book-item-zen {
+    padding: 4rem 0;
+    border-bottom: var(--border-hairline);
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+    animation: fadeInZen 1s ease backwards;
+}
+
+@keyframes fadeInZen {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.item-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+}
+
+.item-header h3 {
+    font-family: 'Libre Baskerville', serif;
+    font-size: 2.22rem;
+    line-height: 1.2;
+}
+
+.badge-zen {
+    font-size: 0.7rem;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    padding: 6px 14px;
+    border: 1px solid #000;
+    border-radius: 100px;
+}
+
+.item-author {
+    font-size: 1.25rem;
+    color: var(--text-secondary);
+    font-weight: 300;
+}
+
+.item-meta {
+    display: flex;
+    gap: 3rem;
+    font-size: 0.9rem;
+    color: var(--text-muted);
+}
+
+.item-summary {
+    font-size: 1.15rem;
+    line-height: 2;
+    color: var(--text-secondary);
+    font-style: italic;
+    border-left: 2px solid #eee;
+    padding-left: 2rem;
+}
+
+.item-actions {
+    display: flex;
+    gap: 2rem;
+    margin-top: 1rem;
+}
+
+.btn-item-action {
+    background: none;
+    border: none;
+    font-family: inherit;
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    text-decoration: underline;
+    text-underline-offset: 4px;
+    cursor: pointer;
+    opacity: 0.5;
+    transition: opacity 0.3s;
+}
+
+.btn-item-action:hover {
+    opacity: 1;
+}
+
+.btn-danger {
+    color: #cc0000;
+}
+
+/* Loading state */
+.zen-loading {
+    position: relative;
+    overflow: hidden;
+}
+
+.zen-loading::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 2px;
+    background: var(--accent);
+    animation: zen-shimmer 2s infinite ease-in-out;
+}
+
+@keyframes zen-shimmer {
+    0% {
+        transform: translateX(-100%);
+    }
+
+    100% {
+        transform: translateX(100%);
+    }
+}
+
+@media (max-width: 600px) {
+    .zen-wrapper {
+        padding: 0 1rem;
+    }
+
+    .zen-form-container {
+        padding: 3rem 1.5rem;
+    }
+
+    .zen-grid {
+        grid-template-columns: 1fr;
+        gap: var(--master-gap);
+    }
+}
