@@ -204,6 +204,40 @@ input[type="checkbox"] {
     transform: scale(1.02);
 }
 
+.btn-zen-secondary {
+    background: transparent;
+    color: var(--text-secondary);
+    border: 1px dashed #ddd;
+    padding: 1rem;
+    border-radius: var(--radius-luxe);
+    font-size: 0.95rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    margin-top: 1rem;
+}
+
+.btn-zen-secondary:hover {
+    border-color: var(--accent);
+    color: var(--accent);
+}
+
+.btn-text-zen {
+    background: none;
+    border: none;
+    color: var(--text-muted);
+    font-size: 0.8rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    cursor: pointer;
+    text-decoration: underline;
+}
+
+.btn-text-zen:hover {
+    color: var(--accent);
+}
+
 /* Listado Minimalista */
 .collection-zen {
     display: flex;

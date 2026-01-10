@@ -56,12 +56,21 @@ import { CommonModule } from '@angular/common';
             </div>
           </div>
 
-          <div class="input-group" style="gap: 2.5rem;">
-            <label for="summary">Resumen Personal</label>
-            <textarea id="summary" name="summary" [(ngModel)]="formState().summary" 
-                      class="zen-input" placeholder="..." 
-                      rows="2" style="resize: none; font-size: 1.1rem; line-height: 1.8;"></textarea>
-          </div>
+          @if (!showSummaryField()) {
+            <button type="button" class="btn-zen-secondary" (click)="showSummaryField.set(true)">
+              + Añadir Resumen Personal
+            </button>
+          } @else {
+            <div class="input-group" style="gap: 1rem;">
+              <div style="display: flex; justify-content: space-between; align-items: baseline;">
+                <label for="summary">Resumen Personal</label>
+                <button type="button" class="btn-text-zen" (click)="showSummaryField.set(false)">Ocultar</button>
+              </div>
+              <textarea id="summary" name="summary" [(ngModel)]="formState().summary" 
+                        class="zen-input" placeholder="Escriba aquí..." 
+                        rows="2" style="resize: none; font-size: 1.1rem; line-height: 1.8;"></textarea>
+            </div>
+          }
 
           <button type="submit" class="btn-zen-action">
             Incorporar a la Colección
@@ -122,6 +131,7 @@ export class App {
 
   searchTerm = signal('');
   isLoading = signal(false);
+  showSummaryField = signal(false);
 
   formState = signal({
     title: '',
