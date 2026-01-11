@@ -23,6 +23,14 @@ export class LibraryService {
         });
     }
 
+    updateBook(book: Book) {
+        this.booksSignal.update(prev => {
+            const updated = prev.map(b => b.id === book.id ? book : b);
+            localStorage.setItem(this.STORAGE_KEY, JSON.stringify(updated));
+            return updated;
+        });
+    }
+
     deleteBook(id: string) {
         this.booksSignal.update(prev => {
             const updated = prev.filter(b => b.id !== id);

@@ -6,4 +6,5 @@ export interface Book {
     pages: number | string;
     read: boolean;
     summary: string;
+    genre: string;
 }
