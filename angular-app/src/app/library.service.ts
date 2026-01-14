@@ -1,50 +1,114 @@
-import { Injectable, signal, computed } from '@angular/core';
+import { Injectable, signal, computed, inject } from '@angular/core';
+import { HttpClient } from '@angular/common/http';
 import { Book } from './book.model';
+import { firstValueFrom } from 'rxjs';
 
 @Injectable({
     providedIn: 'root'
 })
 export class LibraryService {
     private readonly STORAGE_KEY = 'angular_books';
-    private booksSignal = signal<Book[]>(this.loadBooks());
+    private readonly API_URL = 'http://localhost:3000/api/books';
+    private http = inject(HttpClient);
+    private booksSignal = signal<Book[]>([]);
+    private migrated = signal(false);
 
     books = computed(() => this.booksSignal());
 
-    private loadBooks(): Book[] {
+    constructor() {
+        this.initializeBooks();
+    }
+
+    private async initializeBooks() {
+        try {
+            // Try to load from backend first
+            const backendBooks = await firstValueFrom(this.http.get<Book[]>(this.API_URL));
+
+            // If backend is empty, check localStorage for migration
+            if (backendBooks.length === 0 && !this.migrated()) {
+                const localBooks = this.loadFromLocalStorage();
+                if (localBooks.length > 0) {
+                    console.log('📦 Migrando libros desde localStorage a la base de datos...');
+                    // Migrate each book to backend
+                    for (const book of localBooks) {
+                        await firstValueFrom(this.http.post(this.API_URL, book));
+                    }
+                    this.migrated.set(true);
+                    // Clear localStorage after successful migration
+                    localStorage.removeItem(this.STORAGE_KEY);
+                    console.log('✅ Migración completada');
+                    // Reload from backend
+                    const migratedBooks = await firstValueFrom(this.http.get<Book[]>(this.API_URL));
+                    this.booksSignal.set(migratedBooks);
+                } else {
+                    this.booksSignal.set([]);
+                }
+            } else {
+                this.booksSignal.set(backendBooks);
+            }
+        } catch (error) {
+            console.error('❌ Error conectando con el servidor. Usando localStorage como fallback.', error);
+            // Fallback to localStorage if backend is not available
+            this.booksSignal.set(this.loadFromLocalStorage());
+        }
+    }
+
+    private loadFromLocalStorage(): Book[] {
         const saved = localStorage.getItem(this.STORAGE_KEY);
         return saved ? JSON.parse(saved) : [];
     }
 
-    addBook(book: Book) {
-        this.booksSignal.update(prev => {
-            const updated = [...prev, book];
-            localStorage.setItem(this.STORAGE_KEY, JSON.stringify(updated));
-            return updated;
-        });
+    async addBook(book: Book) {
+        try {
+            await firstValueFrom(this.http.post(this.API_URL, book));
+            this.booksSignal.update(prev => [...prev, book]);
+        } catch (error) {
+            console.error('Error adding book:', error);
+            // Fallback to localStorage
+            this.booksSignal.update(prev => {
+                const updated = [...prev, book];
+                localStorage.setItem(this.STORAGE_KEY, JSON.stringify(updated));
+                return updated;
+            });
+        }
     }
 
-    updateBook(book: Book) {
-        this.booksSignal.update(prev => {
-            const updated = prev.map(b => b.id === book.id ? book : b);
-            localStorage.setItem(this.STORAGE_KEY, JSON.stringify(updated));
-            return updated;
-        });
+    async updateBook(book: Book) {
+        try {
+            await firstValueFrom(this.http.put(`${this.API_URL}/${book.id}`, book));
+            this.booksSignal.update(prev => prev.map(b => b.id === book.id ? book : b));
+        } catch (error) {
+            console.error('Error updating book:', error);
+            // Fallback to localStorage
+            this.booksSignal.update(prev => {
+                const updated = prev.map(b => b.id === book.id ? book : b);
+                localStorage.setItem(this.STORAGE_KEY, JSON.stringify(updated));
+                return updated;
+            });
+        }
     }
 
-    deleteBook(id: string) {
-        this.booksSignal.update(prev => {
-            const updated = prev.filter(b => b.id !== id);
-            localStorage.setItem(this.STORAGE_KEY, JSON.stringify(updated));
-            return updated;
-        });
+    async deleteBook(id: string) {
+        try {
+            await firstValueFrom(this.http.delete(`${this.API_URL}/${id}`));
+            this.booksSignal.update(prev => prev.filter(b => b.id !== id));
+        } catch (error) {
+            console.error('Error deleting book:', error);
+            // Fallback to localStorage
+            this.booksSignal.update(prev => {
+                const updated = prev.filter(b => b.id !== id);
+                localStorage.setItem(this.STORAGE_KEY, JSON.stringify(updated));
+                return updated;
+            });
+        }
     }
 
-    toggleReadStatus(id: string) {
-        this.booksSignal.update(prev => {
-            const updated = prev.map(b => b.id === id ? { ...b, read: !b.read } : b);
-            localStorage.setItem(this.STORAGE_KEY, JSON.stringify(updated));
-            return updated;
-        });
+    async toggleReadStatus(id: string) {
+        const book = this.booksSignal().find(b => b.id === id);
+        if (book) {
+            const updatedBook = { ...book, read: !book.read };
+            await this.updateBook(updatedBook);
+        }
     }
 
     async fetchBookByISBN(isbn: string): Promise<Partial<Book> | null> {

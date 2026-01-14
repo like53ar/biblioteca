@@ -272,25 +272,23 @@ input[type="checkbox"] {
 
 .stats-zen {
     position: fixed;
-    left: 20px;
-    top: 50%;
-    transform: translateY(-50%);
-    font-size: 0.95rem;
-    font-weight: 600;
+    right: 30px;
+    top: 30px;
+    font-size: 0.85rem;
+    font-weight: 700;
     text-transform: uppercase;
-    letter-spacing: 0.1em;
+    letter-spacing: 0.15em;
     color: var(--text-primary);
     background: var(--surface-zen);
-    padding: 1rem 1.5rem;
+    padding: 0.8rem 1.2rem;
     border: var(--border-hairline);
-    border-radius: 12px;
+    border-radius: 100px;
     box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
     white-space: nowrap;
-    z-index: 100;
-    pointer-events: none;
-    display: flex;
-    align-items: center;
-    gap: 0.8rem;
+    z-index: 1000;
+    pointer-events: auto;
+    backdrop-filter: blur(10px);
+    border-left: 4px solid var(--accent);
 }
 
 .search-zen {

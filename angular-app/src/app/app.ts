@@ -225,12 +225,12 @@ export class App {
     this.isLoading.set(false);
   }
 
-  addBook(event: Event) {
+  async addBook(event: Event) {
     event.preventDefault();
     const state = this.formState();
     if (state.title && state.author && state.isbn) {
       if (this.editingBookId()) {
-        this.library.updateBook({
+        await this.library.updateBook({
           ...state,
           id: this.editingBookId()!
         });
@@ -246,7 +246,7 @@ export class App {
           summary: state.summary,
           genre: state.genre
         };
-        this.library.addBook(newBook);
+        await this.library.addBook(newBook);
       }
       this.resetForm();
     }

@@ -245,25 +245,23 @@ input[type="checkbox"] {
 
 .stats-zen {
     position: fixed;
-    left: 20px;
-    top: 50%;
-    transform: translateY(-50%);
-    font-size: 0.9rem;
-    font-weight: 600;
+    right: 30px;
+    top: 30px;
+    font-size: 0.85rem;
+    font-weight: 700;
     text-transform: uppercase;
     letter-spacing: 0.15em;
     color: var(--accent);
-    background: rgba(30, 30, 34, 0.9);
-    padding: 1rem 1.5rem;
+    background: var(--surface-zen);
+    padding: 0.8rem 1.2rem;
     border: 1px solid var(--accent-soft);
     border-radius: 100px;
-    /* Estilo píldora lunar */
-    box-shadow: 0 0 20px rgba(129, 140, 248, 0.1);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
     white-space: nowrap;
-    z-index: 100;
-    pointer-events: none;
+    z-index: 1000;
+    pointer-events: auto;
     backdrop-filter: blur(10px);
-    border-left: 3px solid var(--accent);
+    border-left: 4px solid var(--accent);
 }
 
 .search-zen {
