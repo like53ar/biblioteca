@@ -32,7 +32,7 @@ cd ..
 
 REM Esperar a que el backend se inicie
 echo [2/3] Esperando a que el servidor backend se inicie...
-timeout /t 4 /nobreak > nul
+timeout /t 2 /nobreak > nul
 
 REM Iniciar la aplicación Angular
 echo [3/3] Iniciando aplicación Angular...
@@ -49,7 +49,7 @@ echo.
 echo Esperando a que la aplicación esté lista...
 
 REM Esperar 10 segundos para que Angular compile y esté listo
-timeout /t 10 /nobreak > nul
+timeout /t 5 /nobreak > nul
 
 REM Abrir el navegador automáticamente
 echo.
