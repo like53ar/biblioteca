@@ -46,6 +46,10 @@ export class LibraryService {
             } else {
                 this.booksSignal.set(backendBooks);
             }
+
+            // Verify and fix ISBN format for existing books
+            // Verify and fix ISBN format and backfill years
+            await this.repairBookMetadata();
         } catch (error) {
             console.error('❌ Error conectando con el servidor. Usando localStorage como fallback.', error);
             // Fallback to localStorage if backend is not available
@@ -56,6 +60,51 @@ export class LibraryService {
     private loadFromLocalStorage(): Book[] {
         const saved = localStorage.getItem(this.STORAGE_KEY);
         return saved ? JSON.parse(saved) : [];
+    }
+
+    async repairBookMetadata() {
+        const currentBooks = this.booksSignal();
+        let changed = false;
+
+        for (const book of currentBooks) {
+            let needsUpdate = false;
+            let updated = { ...book };
+
+            // 1. Fix ISBN Format
+            const clean = book.isbn.replace(/\D/g, '');
+            if (clean.length === 13) {
+                const formatted = `${clean.substring(0, 3)}-${clean.substring(3, 6)}-${clean.substring(6, 9)}-${clean.substring(9, 12)}-${clean.substring(12, 13)}`;
+                if (book.isbn !== formatted) {
+                    updated.isbn = formatted;
+                    needsUpdate = true;
+                }
+            }
+
+            // 2. Backfill Year if missing
+            if (!book.year && clean.length >= 10) {
+                console.log(`Fetching missing year for: ${book.title}`);
+                const metadata = await this.fetchBookByISBN(clean); // Use clean ISBN
+                if (metadata && metadata.year) {
+                    updated.year = metadata.year;
+                    needsUpdate = true;
+                }
+            }
+
+            if (needsUpdate) {
+                console.log(`Updating metadata for ${book.title}...`);
+                try {
+                    await firstValueFrom(this.http.put(`${this.API_URL}/${book.id}`, updated));
+                    this.booksSignal.update(prev => prev.map(b => b.id === book.id ? updated : b));
+                    changed = true;
+                } catch (e) {
+                    console.error(`Failed to update metadata for ${book.title}`, e);
+                }
+            }
+        }
+
+        if (changed) {
+            console.log('✅ Metadatos de libros actualizados correctamente');
+        }
     }
 
     async addBook(book: Book) {
@@ -132,7 +181,8 @@ export class LibraryService {
                     title: info.title,
                     author: info.authors ? info.authors.join(', ') : '',
                     pages: info.pageCount,
-                    summary: summary
+                    summary: summary,
+                    year: info.publishedDate ? parseInt(info.publishedDate.substring(0, 4)) : undefined
                 };
             }
 
@@ -153,7 +203,8 @@ export class LibraryService {
                     title: info.title,
                     author: info.authors ? info.authors.map((a: any) => a.name).join(', ') : '',
                     pages: info.number_of_pages,
-                    summary: summary
+                    summary: summary,
+                    year: info.publish_date ? parseInt(info.publish_date.match(/\d{4}/)?.[0] || '0') : undefined
                 };
             }
         } catch (error) {

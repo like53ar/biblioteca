@@ -54,7 +54,8 @@ h1,
 
 /* Contenedor Único Centrado */
 .zen-wrapper {
-    max-width: 700px;
+    max-width: 1400px;
+    /* Widened for 3 columns */
     margin: 0 auto;
     display: flex;
     flex-direction: column;
@@ -89,6 +90,12 @@ header p {
     border: var(--border-hairline);
     margin-bottom: 6rem;
     backdrop-filter: blur(20px);
+
+    /* Constrain the form width */
+    max-width: 800px;
+    margin-left: auto;
+    margin-right: auto;
+    width: 100%;
 }
 
 .zen-form {
@@ -156,6 +163,17 @@ label {
 
 .zen-input::placeholder {
     color: #3f3f46;
+}
+
+/* Remove scroll (spinners) from number inputs */
+input[type=number]::-webkit-inner-spin-button,
+input[type=number]::-webkit-outer-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+
+input[type=number] {
+    -moz-appearance: textfield;
 }
 
 /* ISBN con integración */
@@ -279,13 +297,33 @@ input[type="checkbox"] {
     outline: none;
 }
 
+.book-grid-zen {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 2rem;
+}
+
 .book-item-zen {
-    padding: 3rem 0;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    background: var(--surface-zen);
+    padding: 2rem;
+    border-radius: var(--radius-luxe);
+    border: var(--border-hairline);
     display: flex;
     flex-direction: column;
     gap: 1.5rem;
     animation: fadeInZen 0.8s ease backwards;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    height: 480px;
+    /* Fixed height for uniformity */
+    overflow: hidden;
+    /* Hide overflow */
+    justify-content: space-between;
+}
+
+.book-item-zen:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
+    border-color: rgba(129, 140, 248, 0.3);
 }
 
 @keyframes fadeInZen {
@@ -308,9 +346,18 @@ input[type="checkbox"] {
 
 .item-header h3 {
     font-family: 'Libre Baskerville', serif;
-    font-size: 1.8rem;
+    font-size: 1.4rem;
+    /* Slightly smaller for cards */
     line-height: 1.3;
     color: #fff;
+
+    /* Truncate title if too long */
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-line-clamp: 2;
+    /* Compatibility */
+    -webkit-box-orient: vertical;
+    overflow: hidden;
 }
 
 .badge-zen {
@@ -327,11 +374,16 @@ input[type="checkbox"] {
     font-size: 1.1rem;
     color: var(--text-secondary);
     font-weight: 300;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 .item-meta {
     display: flex;
-    gap: 2.5rem;
+    flex-direction: column;
+    /* Stack meta info in cards */
+    gap: 0.5rem;
     font-size: 0.8rem;
     color: var(--text-muted);
 }
@@ -341,18 +393,36 @@ input[type="checkbox"] {
 }
 
 .item-summary {
-    font-size: 1.0rem;
-    line-height: 1.8;
+    font-size: 0.95rem;
+    line-height: 1.6;
     color: var(--text-secondary);
     font-style: italic;
     border-left: 1px solid rgba(255, 255, 255, 0.1);
-    padding-left: 1.75rem;
+    padding-left: 1rem;
+
+    /* Truncate text after 3 lines */
+    display: -webkit-box;
+    -webkit-line-clamp: 5;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    text-overflow: ellipsis;
+
+    max-height: 150px;
+    /* Constrain height */
+    flex-grow: 0;
+    /* Don't expand */
+    margin-bottom: auto;
 }
 
 .item-actions {
     display: flex;
-    gap: 1.5rem;
-    margin-top: 1rem;
+    gap: 1rem;
+    margin-top: auto;
+    /* Align to bottom */
+    padding-top: 1.5rem;
+    border-top: 1px solid rgba(255, 255, 255, 0.05);
+    flex-wrap: wrap;
+    justify-content: space-between;
 }
 
 .btn-item-action {
@@ -396,6 +466,38 @@ input[type="checkbox"] {
     animation: zen-shimmer 1.5s infinite ease-in-out;
 }
 
+.btn-zen-secondary {
+    background: transparent;
+    color: var(--text-secondary);
+    border: 1px solid var(--text-muted);
+    padding: 1.25rem;
+    border-radius: 100px;
+    font-size: 1.05rem;
+    font-weight: 600;
+    cursor: pointer;
+    margin-top: 1rem;
+    transition: all 0.3s ease;
+    flex: 1 !important;
+    /* Force equal sizing if flex */
+}
+
+.btn-zen-secondary:hover {
+    border-color: #ef4444;
+    color: #ef4444;
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(239, 68, 68, 0.2);
+}
+
+.btn-text-zen {
+    background: none;
+    border: none;
+    color: var(--accent);
+    cursor: pointer;
+    font-size: 0.9rem;
+    text-decoration: underline;
+    opacity: 0.8;
+}
+
 @keyframes zen-shimmer {
     0% {
         transform: translateX(-100%);
@@ -418,5 +520,21 @@ input[type="checkbox"] {
     .zen-grid {
         grid-template-columns: 1fr;
         gap: var(--master-gap);
+    }
+}
+
+@media (max-width: 1100px) {
+    .book-grid-zen {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .zen-wrapper {
+        max-width: 900px;
+    }
+}
+
+@media (max-width: 650px) {
+    .book-grid-zen {
+        grid-template-columns: 1fr;
     }
 }

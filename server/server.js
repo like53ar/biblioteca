@@ -15,6 +15,7 @@ const dbPath = path.join(__dirname, 'library.db');
 const db = new sqlite3.Database(dbPath);
 
 // Create table if not exists
+// Create table if not exists and handle migration
 db.serialize(() => {
     db.run(`
     CREATE TABLE IF NOT EXISTS books (
@@ -25,9 +26,18 @@ db.serialize(() => {
       pages INTEGER,
       read INTEGER DEFAULT 0,
       summary TEXT,
-      genre TEXT
+      genre TEXT,
+      year INTEGER
     )
   `);
+
+    // Migration to add year column if it doesn't exist (for existing databases)
+    db.run("ALTER TABLE books ADD COLUMN year INTEGER", (err) => {
+        // Ignore error if column already exists
+        if (err && !err.message.includes("duplicate column name")) {
+            console.log("Migration info:", err.message);
+        }
+    });
 });
 
 // Endpoints
@@ -43,12 +53,12 @@ app.get('/api/books', (req, res) => {
 });
 
 app.post('/api/books', (req, res) => {
-    const { id, title, author, isbn, pages, read, summary, genre } = req.body;
+    const { id, title, author, isbn, pages, read, summary, genre, year } = req.body;
     const sql = `
-    INSERT INTO books (id, title, author, isbn, pages, read, summary, genre)
-    VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+    INSERT INTO books (id, title, author, isbn, pages, read, summary, genre, year)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
   `;
-    db.run(sql, [id, title, author, isbn, pages, read ? 1 : 0, summary, genre], (err) => {
+    db.run(sql, [id, title, author, isbn, pages, read ? 1 : 0, summary, genre, year], (err) => {
         if (err) {
             return res.status(500).json({ error: err.message });
         }
@@ -58,13 +68,13 @@ app.post('/api/books', (req, res) => {
 
 app.put('/api/books/:id', (req, res) => {
     const { id } = req.params;
-    const { title, author, isbn, pages, read, summary, genre } = req.body;
+    const { title, author, isbn, pages, read, summary, genre, year } = req.body;
     const sql = `
     UPDATE books 
-    SET title = ?, author = ?, isbn = ?, pages = ?, read = ?, summary = ?, genre = ?
+    SET title = ?, author = ?, isbn = ?, pages = ?, read = ?, summary = ?, genre = ?, year = ?
     WHERE id = ?
   `;
-    db.run(sql, [title, author, isbn, pages, read ? 1 : 0, summary, genre, id], (err) => {
+    db.run(sql, [title, author, isbn, pages, read ? 1 : 0, summary, genre, year, id], (err) => {
         if (err) {
             return res.status(500).json({ error: err.message });
         }

@@ -44,7 +44,7 @@ import { CommonModule } from '@angular/common';
             </div>
           </div>
 
-          <div class="zen-grid" style="grid-template-columns: 0.5fr 1.5fr 1fr; gap: 2rem;">
+          <div class="zen-grid" style="grid-template-columns: 0.6fr 1.2fr 0.6fr 1.2fr; gap: 3rem;">
             <div class="input-group">
               <label for="pages">Páginas</label>
               <input type="number" id="pages" name="pages" [(ngModel)]="formState().pages" 
@@ -58,6 +58,11 @@ import { CommonModule } from '@angular/common';
                   <option [value]="g">{{ g }}</option>
                 }
               </select>
+            </div>
+            <div class="input-group">
+              <label for="year">Año</label>
+              <input type="number" id="year" name="year" [(ngModel)]="formState().year" 
+                     class="zen-input" placeholder="Ej. 2024">
             </div>
             <div class="input-group">
               <label>Estado</label>
@@ -104,7 +109,7 @@ import { CommonModule } from '@angular/common';
         <input type="text" [ngModel]="searchTerm()" (ngModelChange)="searchTerm.set($event)" 
                class="search-zen" placeholder="Buscar en el silencio...">
 
-        <div style="display: flex; flex-direction: column;">
+        <div class="book-grid-zen">
           @for (book of filteredBooks(); track book.id) {
             <article class="book-item-zen">
               <div class="item-header">
@@ -119,7 +124,8 @@ import { CommonModule } from '@angular/common';
               <div class="item-meta">
                 <span>ISBN <strong>{{ book.isbn }}</strong></span>
                 <span>GÉNERO <strong>{{ book.genre || 'S/D' }}</strong></span>
-                <span>EXTENSIÓN <strong>{{ book.pages || 'S/D' }}</strong></span>
+                <span>PÁGS <strong>{{ book.pages || 'S/D' }}</strong></span>
+                <span>AÑO DE EDICIÓN <strong>{{ book.year || 'S/D' }}</strong></span>
               </div>
 
               @if (book.summary) {
@@ -131,15 +137,15 @@ import { CommonModule } from '@angular/common';
                    Ver/Editar
                 </button>
                 <button class="btn-item-action" (click)="library.toggleReadStatus(book.id)">
-                   Cambiar a {{ book.read ? 'Pendiente' : 'Leído' }}
+                   {{ book.read ? 'Marcar Pendiente' : 'Marcar Leído' }}
                 </button>
                 <button class="btn-item-action btn-danger" (click)="library.deleteBook(book.id)">
-                   Remover Registro
+                   Eliminar
                 </button>
               </div>
             </article>
           } @empty {
-            <div style="text-align: center; padding: 10rem 0; color: var(--text-muted);">
+            <div style="grid-column: 1 / -1; text-align: center; padding: 10rem 0; color: var(--text-muted);">
               <p style="font-size: 1.2rem; font-style: italic;">La biblioteca está en silencio.</p>
             </div>
           }
@@ -179,6 +185,7 @@ export class App {
     read: boolean;
     summary: string;
     genre: string;
+    year?: number;
   }>({
     title: '',
     author: '',
@@ -186,7 +193,8 @@ export class App {
     pages: '',
     read: false,
     summary: '',
-    genre: ''
+    genre: '',
+    year: undefined
   });
 
   totalBooks = computed(() => this.library.books().length);
@@ -199,9 +207,26 @@ export class App {
   });
 
   onIsbnInput() {
-    const isbn = this.formState().isbn.replace(/[-\s]/g, '');
-    if (isbn.length === 10 || isbn.length === 13) {
-      this.fetchBook(isbn);
+    let value = this.formState().isbn.replace(/\D/g, '');
+
+    // Limit to 13 digits
+    if (value.length > 13) {
+      value = value.substring(0, 13);
+    }
+
+    // Apply strict format: XXX-XXX-XXX-XXX-X
+    let formatted = '';
+    if (value.length > 0) formatted += value.substring(0, 3);
+    if (value.length > 3) formatted += '-' + value.substring(3, 6);
+    if (value.length > 6) formatted += '-' + value.substring(6, 9);
+    if (value.length > 9) formatted += '-' + value.substring(9, 12);
+    if (value.length > 12) formatted += '-' + value.substring(12, 13);
+
+    this.formState.update(s => ({ ...s, isbn: formatted }));
+
+    // Trigger fetch if we have a full ISBN (13 digits raw)
+    if (value.length === 13 || value.length === 10) {
+      this.fetchBook(value);
     }
   }
 
@@ -219,7 +244,8 @@ export class App {
         title: data.title || prev.title,
         author: data.author || prev.author,
         pages: data.pages || prev.pages,
-        summary: data.summary || prev.summary
+        summary: data.summary || prev.summary,
+        year: data.year || prev.year
       }));
     }
     this.isLoading.set(false);
@@ -244,7 +270,8 @@ export class App {
           pages: state.pages,
           read: state.read,
           summary: state.summary,
-          genre: state.genre
+          genre: state.genre,
+          year: state.year
         };
         await this.library.addBook(newBook);
       }
@@ -261,7 +288,8 @@ export class App {
       pages: book.pages,
       read: book.read,
       summary: book.summary,
-      genre: book.genre
+      genre: book.genre,
+      year: book.year
     });
     if (book.summary) this.showSummaryField.set(true);
     window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -280,7 +308,8 @@ export class App {
       pages: '',
       read: false,
       summary: '',
-      genre: ''
+      genre: '',
+      year: undefined
     });
   }
 }

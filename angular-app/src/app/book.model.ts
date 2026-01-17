@@ -7,4 +7,5 @@ export interface Book {
     read: boolean;
     summary: string;
     genre: string;
+    year?: number;
 }
