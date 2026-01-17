@@ -89,13 +89,17 @@ import { CommonModule } from '@angular/common';
             </div>
           }
 
-          <div style="display: flex; gap: 1rem; margin-top: 1.5rem;">
+            <div style="display: flex; gap: 1rem; margin-top: 1.5rem;">
             <button type="submit" class="btn-zen-action" style="flex: 2; margin-top: 0;">
               {{ editingBookId() ? 'Actualizar Registro' : 'Incorporar a la Colección' }}
             </button>
             @if (editingBookId()) {
               <button type="button" (click)="cancelEdit()" class="btn-zen-secondary" style="margin-top: 0;">
                 Cancelar
+              </button>
+            } @else {
+               <button type="button" (click)="resetForm()" class="btn-zen-secondary" style="margin-top: 0;">
+                Limpiar
               </button>
             }
           </div>
@@ -300,7 +304,7 @@ export class App {
     this.resetForm();
   }
 
-  private resetForm() {
+  public resetForm() {
     this.formState.set({
       title: '',
       author: '',

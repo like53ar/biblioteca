@@ -193,7 +193,7 @@ export class LibraryService {
 
             if (data[bookKey]) {
                 const info = data[bookKey];
-                let summary = info.notes || info.comment || '';
+                let summary = info.notes || info.comment || info.excerpts?.[0]?.text || '';
 
                 if (!summary) {
                     summary = await this.fetchWikipediaSummary(info.title);
