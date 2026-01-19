@@ -164,10 +164,22 @@ export class LibraryService {
         const cleanISBN = isbn.replace(/[-\s]/g, '');
         if (cleanISBN.length < 10) return null;
 
+        let result = await this.fetchGoogleBooks(cleanISBN);
+        if (result) return result;
+
+        result = await this.fetchOpenLibraryBooksAPI(cleanISBN);
+        if (result) return result;
+
+        result = await this.fetchOpenLibrarySearch(cleanISBN);
+        if (result) return result;
+
+        return await this.fetchCrossref(cleanISBN);
+    }
+
+    private async fetchGoogleBooks(isbn: string): Promise<Partial<Book> | null> {
         try {
-            // 1. Google Books
-            let response = await fetch(`https://www.googleapis.com/books/v1/volumes?q=isbn:${cleanISBN}`);
-            let data = await response.json();
+            const response = await fetch(`https://www.googleapis.com/books/v1/volumes?q=isbn:${isbn}`);
+            const data = await response.json();
 
             if (data.items && data.items.length > 0) {
                 const info = data.items[0].volumeInfo;
@@ -185,11 +197,17 @@ export class LibraryService {
                     year: info.publishedDate ? parseInt(info.publishedDate.substring(0, 4)) : undefined
                 };
             }
+        } catch (error) {
+            console.error('Google Books error:', error);
+        }
+        return null;
+    }
 
-            // 2. Open Library Fallback
-            response = await fetch(`https://openlibrary.org/api/books?bibkeys=ISBN:${cleanISBN}&format=json&jscmd=data`);
-            data = await response.json();
-            const bookKey = `ISBN:${cleanISBN}`;
+    private async fetchOpenLibraryBooksAPI(isbn: string): Promise<Partial<Book> | null> {
+        try {
+            const response = await fetch(`https://openlibrary.org/api/books?bibkeys=ISBN:${isbn}&format=json&jscmd=data`);
+            const data = await response.json();
+            const bookKey = `ISBN:${isbn}`;
 
             if (data[bookKey]) {
                 const info = data[bookKey];
@@ -208,7 +226,68 @@ export class LibraryService {
                 };
             }
         } catch (error) {
-            console.error('ISBN Fetch error:', error);
+            console.error('Open Library Books API error:', error);
+        }
+        return null;
+    }
+
+    private async fetchOpenLibrarySearch(isbn: string): Promise<Partial<Book> | null> {
+        try {
+            const response = await fetch(`https://openlibrary.org/search.json?isbn=${isbn}`);
+            const data = await response.json();
+
+            if (data.docs && data.docs.length > 0) {
+                const info = data.docs[0];
+                let summary = ''; // Search API rarely returns full summaries
+
+                if (!summary) {
+                    summary = await this.fetchWikipediaSummary(info.title);
+                }
+
+                return {
+                    title: info.title,
+                    author: info.author_name ? info.author_name.join(', ') : '',
+                    pages: info.number_of_pages_median || undefined, // Search API often uses median
+                    summary: summary,
+                    year: info.first_publish_year || (info.publish_year ? Math.min(...info.publish_year) : undefined)
+                };
+            }
+        } catch (error) {
+            console.error('Open Library Search API error:', error);
+        }
+        return null;
+    }
+
+    private async fetchCrossref(isbn: string): Promise<Partial<Book> | null> {
+        try {
+            const response = await fetch(`https://api.crossref.org/works?query=${isbn}&rows=1`);
+            const data = await response.json();
+
+            if (data.message && data.message.items && data.message.items.length > 0) {
+                const item = data.message.items[0];
+                
+                // Crossref returns varying structures, checking relevance
+                if (item.ISBN && item.ISBN.some((i: string) => i.replace(/-/g, '') === isbn)) {
+                     let summary = item.abstract || '';
+                     
+                     // Clean up abstract XML tags if present (common in Crossref)
+                     summary = summary.replace(/<[^>]*>/g, '');
+
+                     if (!summary) {
+                        summary = await this.fetchWikipediaSummary(item.title[0]);
+                     }
+
+                    return {
+                        title: item.title ? item.title[0] : '',
+                        author: item.author ? item.author.map((a: any) => `${a.given} ${a.family}`).join(', ') : '',
+                        pages: undefined, // Crossref often lacks page counts for books
+                        summary: summary,
+                        year: item.published ? item.published['date-parts'][0][0] : undefined
+                    };
+                }
+            }
+        } catch (error) {
+            console.error('Crossref API error:', error);
         }
         return null;
     }

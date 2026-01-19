@@ -205,9 +205,20 @@ export class App {
 
   filteredBooks = computed(() => {
     const term = this.searchTerm().toLowerCase();
-    return this.library.books().filter(b =>
+    const books = this.library.books().filter(b =>
       b.title.toLowerCase().includes(term) || b.author.toLowerCase().includes(term)
     );
+
+    return books.sort((a, b) => {
+      const yearA = a.year || -1;
+      const yearB = b.year || -1;
+      // Sort descending (newest first)
+      // Books without year (-1) go to the bottom
+      if (yearA === -1 && yearB === -1) return 0;
+      if (yearA === -1) return 1;
+      if (yearB === -1) return -1;
+      return yearB - yearA;
+    });
   });
 
   onIsbnInput() {
