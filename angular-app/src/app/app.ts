@@ -241,11 +241,27 @@ export class App {
 
     // Trigger fetch if we have a full ISBN (13 digits raw)
     if (value.length === 13 || value.length === 10) {
+      // Check for duplicates before fetching
+      const duplicate = this.library.books().find(b => b.isbn.replace(/\D/g, '') === value);
+      if (duplicate) {
+        alert(`⚠️ El libro con ISBN ${value} ya existe en la biblioteca:\n"${duplicate.title}"`);
+        return;
+      }
+
       this.fetchBook(value);
     }
   }
 
   async manualFetch() {
+    const rawIsbn = this.formState().isbn.replace(/\D/g, '');
+
+    // Check for duplicates
+    const duplicate = this.library.books().find(b => b.isbn.replace(/\D/g, '') === rawIsbn);
+    if (duplicate) {
+      alert(`⚠️ El libro con ISBN ${rawIsbn} ya existe en la biblioteca:\n"${duplicate.title}"`);
+      return;
+    }
+
     const isbn = this.formState().isbn;
     if (isbn) await this.fetchBook(isbn);
   }
@@ -270,6 +286,18 @@ export class App {
     event.preventDefault();
     const state = this.formState();
     if (state.title && state.author && state.isbn) {
+
+      // Safeguard: Check for duplicates before saving
+      const cleanIsbn = state.isbn.replace(/\D/g, '');
+      const duplicate = this.library.books().find(b =>
+        b.isbn.replace(/\D/g, '') === cleanIsbn && b.id !== (this.editingBookId() || '')
+      );
+
+      if (duplicate) {
+        alert(`⚠️ No se puede guardar. El libro con ISBN ${cleanIsbn} ya existe:\n"${duplicate.title}"`);
+        return;
+      }
+
       if (this.editingBookId()) {
         await this.library.updateBook({
           ...state,
