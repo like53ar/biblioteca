@@ -1,4 +1,4 @@
-import { Component, signal, computed, inject, effect } from '@angular/core';
+import { Component, signal, computed, inject, effect, ViewChild, ElementRef } from '@angular/core';
 import { LibraryService } from './library.service';
 import { Book } from './book.model';
 import { FormsModule } from '@angular/forms';
@@ -25,7 +25,7 @@ import { CommonModule } from '@angular/common';
           <div class="input-group" [class.zen-loading]="isLoading()">
             <label for="isbn">Identificador ISBN</label>
             <div class="isbn-field">
-              <input type="text" id="isbn" name="isbn" [(ngModel)]="formState().isbn" 
+              <input type="text" #isbnInput id="isbn" name="isbn" [(ngModel)]="formState().isbn" 
                      (input)="onIsbnInput()" class="zen-input" placeholder="Pulse para escribir...">
               <button type="button" (click)="manualFetch()" class="btn-zen-sync" title="Sincronizar">🔍</button>
             </div>
@@ -161,6 +161,8 @@ import { CommonModule } from '@angular/common';
 })
 export class App {
   library = inject(LibraryService);
+
+  @ViewChild('isbnInput') isbnInput!: ElementRef;
 
   searchTerm = signal('');
   isLoading = signal(false);
@@ -319,6 +321,7 @@ export class App {
         await this.library.addBook(newBook);
       }
       this.resetForm();
+      setTimeout(() => this.isbnInput.nativeElement.focus(), 0);
     }
   }
 
