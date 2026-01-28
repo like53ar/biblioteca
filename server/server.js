@@ -27,15 +27,22 @@ db.serialize(() => {
       read INTEGER DEFAULT 0,
       summary TEXT,
       genre TEXT,
-      year INTEGER
+      year INTEGER,
+      borrowed INTEGER DEFAULT 0
     )
   `);
 
-    // Migration to add year column if it doesn't exist (for existing databases)
+    // Migration to add year column if it doesn't exist
     db.run("ALTER TABLE books ADD COLUMN year INTEGER", (err) => {
-        // Ignore error if column already exists
         if (err && !err.message.includes("duplicate column name")) {
-            console.log("Migration info:", err.message);
+            console.log("Migration info (year):", err.message);
+        }
+    });
+
+    // Migration to add borrowed column if it doesn't exist
+    db.run("ALTER TABLE books ADD COLUMN borrowed INTEGER DEFAULT 0", (err) => {
+        if (err && !err.message.includes("duplicate column name")) {
+            console.log("Migration info (borrowed):", err.message);
         }
     });
 });
@@ -46,19 +53,23 @@ app.get('/api/books', (req, res) => {
         if (err) {
             return res.status(500).json({ error: err.message });
         }
-        // Convert read from 0/1 to boolean
-        const formattedBooks = rows.map(b => ({ ...b, read: !!b.read }));
+        // Convert read and borrowed from 0/1 to boolean
+        const formattedBooks = rows.map(b => ({
+            ...b,
+            read: !!b.read,
+            borrowed: !!b.borrowed
+        }));
         res.json(formattedBooks);
     });
 });
 
 app.post('/api/books', (req, res) => {
-    const { id, title, author, isbn, pages, read, summary, genre, year } = req.body;
+    const { id, title, author, isbn, pages, read, summary, genre, year, borrowed } = req.body;
     const sql = `
-    INSERT INTO books (id, title, author, isbn, pages, read, summary, genre, year)
-    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+    INSERT INTO books (id, title, author, isbn, pages, read, summary, genre, year, borrowed)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
   `;
-    db.run(sql, [id, title, author, isbn, pages, read ? 1 : 0, summary, genre, year], (err) => {
+    db.run(sql, [id, title, author, isbn, pages, read ? 1 : 0, summary, genre, year, borrowed ? 1 : 0], (err) => {
         if (err) {
             return res.status(500).json({ error: err.message });
         }
@@ -68,13 +79,13 @@ app.post('/api/books', (req, res) => {
 
 app.put('/api/books/:id', (req, res) => {
     const { id } = req.params;
-    const { title, author, isbn, pages, read, summary, genre, year } = req.body;
+    const { title, author, isbn, pages, read, summary, genre, year, borrowed } = req.body;
     const sql = `
     UPDATE books 
-    SET title = ?, author = ?, isbn = ?, pages = ?, read = ?, summary = ?, genre = ?, year = ?
+    SET title = ?, author = ?, isbn = ?, pages = ?, read = ?, summary = ?, genre = ?, year = ?, borrowed = ?
     WHERE id = ?
   `;
-    db.run(sql, [title, author, isbn, pages, read ? 1 : 0, summary, genre, year, id], (err) => {
+    db.run(sql, [title, author, isbn, pages, read ? 1 : 0, summary, genre, year, borrowed ? 1 : 0, id], (err) => {
         if (err) {
             return res.status(500).json({ error: err.message });
         }

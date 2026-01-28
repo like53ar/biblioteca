@@ -70,6 +70,10 @@ import { CommonModule } from '@angular/common';
                 <input type="checkbox" id="read" name="read" [(ngModel)]="formState().read">
                 <span style="font-size: 0.95rem; font-weight: 500;">Leído</span>
               </div>
+              <div class="zen-checkbox">
+                <input type="checkbox" id="borrowed" name="borrowed" [(ngModel)]="formState().borrowed">
+                <span style="font-size: 0.95rem; font-weight: 500;">Prestado</span>
+              </div>
             </div>
           </div>
 
@@ -121,6 +125,11 @@ import { CommonModule } from '@angular/common';
                 <span class="badge-zen">
                   {{ book.read ? 'LEÍDO' : 'PENDIENTE' }}
                 </span>
+                @if (book.borrowed) {
+                  <span class="badge-zen" style="margin-left: 0.5rem; border-color: #fca5a5; color: #fca5a5;">
+                    PRESTADO
+                  </span>
+                }
               </div>
               
               <div class="item-author">{{ book.author }}</div>
@@ -142,6 +151,9 @@ import { CommonModule } from '@angular/common';
                 </button>
                 <button class="btn-item-action" (click)="library.toggleReadStatus(book.id)">
                    {{ book.read ? 'Marcar Pendiente' : 'Marcar Leído' }}
+                </button>
+                <button class="btn-item-action" (click)="toggleBorrowed(book)">
+                   {{ book.borrowed ? 'Marcar Devuelto' : 'Marcar Prestado' }}
                 </button>
                 <button class="btn-item-action btn-danger" (click)="library.deleteBook(book.id)">
                    Eliminar
@@ -192,6 +204,7 @@ export class App {
     summary: string;
     genre: string;
     year?: number;
+    borrowed: boolean;
   }>({
     title: '',
     author: '',
@@ -200,7 +213,8 @@ export class App {
     read: false,
     summary: '',
     genre: '',
-    year: undefined
+    year: undefined,
+    borrowed: false
   });
 
   totalBooks = computed(() => this.library.books().length);
@@ -278,7 +292,9 @@ export class App {
         author: data.author || prev.author,
         pages: data.pages || prev.pages,
         summary: data.summary || prev.summary,
-        year: data.year || prev.year
+        year: data.year || prev.year,
+        // Keep existing borrowed status or default to false
+        borrowed: prev.borrowed
       }));
     }
     this.isLoading.set(false);
@@ -316,7 +332,8 @@ export class App {
           read: state.read,
           summary: state.summary,
           genre: state.genre,
-          year: state.year
+          year: state.year,
+          borrowed: state.borrowed
         };
         await this.library.addBook(newBook);
       }
@@ -335,7 +352,8 @@ export class App {
       read: book.read,
       summary: book.summary,
       genre: book.genre,
-      year: book.year
+      year: book.year,
+      borrowed: !!book.borrowed
     });
     if (book.summary) this.showSummaryField.set(true);
     window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -355,7 +373,15 @@ export class App {
       read: false,
       summary: '',
       genre: '',
-      year: undefined
+      year: undefined,
+      borrowed: false
+    });
+  }
+
+  async toggleBorrowed(book: Book) {
+    await this.library.updateBook({
+      ...book,
+      borrowed: !book.borrowed
     });
   }
 }

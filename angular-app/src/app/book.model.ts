@@ -8,4 +8,5 @@ export interface Book {
     summary: string;
     genre: string;
     year?: number;
+    borrowed?: boolean;
 }
