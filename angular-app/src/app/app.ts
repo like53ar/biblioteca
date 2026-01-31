@@ -65,7 +65,7 @@ import { CommonModule } from '@angular/common';
                      class="zen-input" placeholder="Ej. 2024">
             </div>
             <div class="input-group">
-              <label>Estado y Formato</label>
+              <label>Estado y Formato <span style="color: var(--color-accent); font-weight: normal; font-size: 0.85em;">*</span></label>
               <div class="zen-checkbox">
                 <input type="checkbox" id="read" name="read" [(ngModel)]="formState().read">
                 <span style="font-size: 0.95rem; font-weight: 500;">Leído</span>
@@ -330,6 +330,11 @@ export class App {
     event.preventDefault();
     const state = this.formState();
     if (state.title && state.author && state.isbn) {
+      // Validation: Must be Paper or Digital
+      if (!state.isPaper && !state.isDigital) {
+        alert('⚠️ Por favor, indique si el libro es formato Papel o Digital (o ambos) antes de continuar.');
+        return;
+      }
 
       // Safeguard: Check for duplicates before saving
       const cleanIsbn = state.isbn.replace(/\D/g, '');

@@ -90,6 +90,12 @@ export class LibraryService {
                 }
             }
 
+            // 3. Backfill Format
+            if (book.isPaper === undefined && book.isDigital === undefined) {
+                updated.isPaper = true;
+                needsUpdate = true;
+            }
+
             if (needsUpdate) {
                 console.log(`Updating metadata for ${book.title}...`);
                 try {
@@ -164,16 +170,104 @@ export class LibraryService {
         const cleanISBN = isbn.replace(/[-\s]/g, '');
         if (cleanISBN.length < 10) return null;
 
-        let result = await this.fetchGoogleBooks(cleanISBN);
-        if (result) return result;
+        let bestResult: Partial<Book> | null = null;
 
-        result = await this.fetchOpenLibraryBooksAPI(cleanISBN);
-        if (result) return result;
+        // 1. Google Books (Primary source for Metadata & Summary)
+        const googleResult = await this.fetchGoogleBooks(cleanISBN);
+        if (googleResult) {
+            bestResult = googleResult;
+        }
 
-        result = await this.fetchOpenLibrarySearch(cleanISBN);
-        if (result) return result;
+        // 2. Open Library (Secondary source, sometimes has better summaries or fills gaps)
+        // If we don't have a result OR we don't have a good summary yet
+        if (!bestResult || !this.isValidSummary(bestResult.summary)) {
+            const olResult = await this.fetchOpenLibraryBooksAPI(cleanISBN);
+            if (olResult) {
+                if (!bestResult) {
+                    bestResult = olResult;
+                } else {
+                    // Augmented Merge
+                    if (!this.isValidSummary(bestResult.summary) && this.isValidSummary(olResult.summary)) {
+                        bestResult.summary = olResult.summary;
+                    }
+                    if (!bestResult.pages && olResult.pages) bestResult.pages = olResult.pages;
+                    if (!bestResult.year && olResult.year) bestResult.year = olResult.year;
+                }
+            }
+        }
 
-        return await this.fetchCrossref(cleanISBN);
+        // 3. Open Library Search (Fallback for metadata mostly, rarely has good summary)
+        if (!bestResult) {
+            const olSearchResult = await this.fetchOpenLibrarySearch(cleanISBN);
+            if (olSearchResult) {
+                bestResult = olSearchResult;
+            }
+        }
+
+        // 4. Crossref (Last resort)
+        if (!bestResult) {
+            const crossrefResult = await this.fetchCrossref(cleanISBN);
+            if (crossrefResult) {
+                bestResult = crossrefResult;
+            }
+        }
+
+        // Final cleanup
+        if (bestResult) {
+            if (bestResult.summary) {
+                bestResult.summary = this.cleanSummary(bestResult.summary);
+            }
+            // If summary became empty after cleaning, set it to generic fallback or empty
+            if (!bestResult.summary) bestResult.summary = '';
+        }
+
+        return bestResult;
+    }
+
+    private isValidSummary(summary?: string): boolean {
+        if (!summary) return false;
+        const clean = this.cleanSummary(summary);
+        return clean.length > 20; // Ignore very short texts
+    }
+
+    private cleanSummary(text: string): string {
+        if (!text) return '';
+
+        let clean = text;
+
+        // Remove HTML tags
+        clean = clean.replace(/<[^>]*>/g, '');
+
+        // Common garbage phrases in free APIs
+        const garbagePhrases = [
+            "This is a digital copy",
+            "digitized by",
+            "This book was",
+            "Created by",
+            "Imported from",
+            "No description available",
+            "Publisher's description",
+            "Edition description",
+            "Work description",
+            "Table of Contents",
+            "Includes bibliographical references",
+            "Includes index",
+            "Bibliography"
+        ];
+
+        // If the summary is just one of these phrases (or starts with it contextually poorly), kill it.
+        // A simple check: if it contains "digitized by Google", assume it's garbage.
+        if (clean.toLowerCase().includes('digitized by')) return '';
+        if (clean.toLowerCase().includes('google books')) return '';
+        if (clean.toLowerCase().includes('imported from')) return '';
+        if (clean.toLowerCase().includes('includes bibliographical references')) return '';
+
+        // Check if any garbage phrase is contained in the summary
+        if (garbagePhrases.some(phrase => clean.trim().toLowerCase().includes(phrase.toLowerCase()))) {
+            return '';
+        }
+
+        return clean.trim();
     }
 
     private async fetchGoogleBooks(isbn: string): Promise<Partial<Book> | null> {
@@ -207,10 +301,14 @@ export class LibraryService {
 
             if (data[bookKey]) {
                 const info = data[bookKey];
-                let summary = info.notes || info.comment || info.excerpts?.[0]?.text || '';
+                let summary = info.notes || info.comment || '';
+
+                // Excerpts sometimes useful, but often just snippets
+                if (!summary && info.excerpts && info.excerpts.length > 0) {
+                    summary = info.excerpts[0].text;
+                }
 
                 if (typeof summary === 'object' && summary !== null) {
-                    // Sometimes notes is an object { type: 'string', value: '...' }
                     summary = (summary as any).value || '';
                 }
 
@@ -240,7 +338,7 @@ export class LibraryService {
                     title: info.title,
                     author: info.author_name ? info.author_name.join(', ') : '',
                     pages: info.number_of_pages_median || undefined,
-                    summary: '', // Search API rarely returns useable summaries
+                    summary: '',
                     year: info.first_publish_year || (info.publish_year ? Math.min(...info.publish_year) : undefined)
                 };
             }
@@ -275,10 +373,5 @@ export class LibraryService {
             console.error('Crossref API error:', error);
         }
         return null;
-    }
-
-    // Removed generic Wikipedia fallback as it was fetching incorrect summaries based solely on titles.
-    private async fetchWikipediaSummary(title: string): Promise<string> {
-        return '';
     }
 }
