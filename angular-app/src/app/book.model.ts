@@ -9,4 +9,6 @@ export interface Book {
     genre: string;
     year?: number;
     borrowed?: boolean;
+    isPaper?: boolean;
+    isDigital?: boolean;
 }

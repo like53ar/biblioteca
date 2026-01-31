@@ -185,10 +185,6 @@ export class LibraryService {
                 const info = data.items[0].volumeInfo;
                 let summary = info.description || '';
 
-                if (!summary) {
-                    summary = await this.fetchWikipediaSummary(info.title);
-                }
-
                 return {
                     title: info.title,
                     author: info.authors ? info.authors.join(', ') : '',
@@ -213,8 +209,9 @@ export class LibraryService {
                 const info = data[bookKey];
                 let summary = info.notes || info.comment || info.excerpts?.[0]?.text || '';
 
-                if (!summary) {
-                    summary = await this.fetchWikipediaSummary(info.title);
+                if (typeof summary === 'object' && summary !== null) {
+                    // Sometimes notes is an object { type: 'string', value: '...' }
+                    summary = (summary as any).value || '';
                 }
 
                 return {
@@ -238,17 +235,12 @@ export class LibraryService {
 
             if (data.docs && data.docs.length > 0) {
                 const info = data.docs[0];
-                let summary = ''; // Search API rarely returns full summaries
-
-                if (!summary) {
-                    summary = await this.fetchWikipediaSummary(info.title);
-                }
 
                 return {
                     title: info.title,
                     author: info.author_name ? info.author_name.join(', ') : '',
-                    pages: info.number_of_pages_median || undefined, // Search API often uses median
-                    summary: summary,
+                    pages: info.number_of_pages_median || undefined,
+                    summary: '', // Search API rarely returns useable summaries
                     year: info.first_publish_year || (info.publish_year ? Math.min(...info.publish_year) : undefined)
                 };
             }
@@ -265,22 +257,15 @@ export class LibraryService {
 
             if (data.message && data.message.items && data.message.items.length > 0) {
                 const item = data.message.items[0];
-                
-                // Crossref returns varying structures, checking relevance
-                if (item.ISBN && item.ISBN.some((i: string) => i.replace(/-/g, '') === isbn)) {
-                     let summary = item.abstract || '';
-                     
-                     // Clean up abstract XML tags if present (common in Crossref)
-                     summary = summary.replace(/<[^>]*>/g, '');
 
-                     if (!summary) {
-                        summary = await this.fetchWikipediaSummary(item.title[0]);
-                     }
+                if (item.ISBN && item.ISBN.some((i: string) => i.replace(/-/g, '') === isbn)) {
+                    let summary = item.abstract || '';
+                    summary = summary.replace(/<[^>]*>/g, '');
 
                     return {
                         title: item.title ? item.title[0] : '',
                         author: item.author ? item.author.map((a: any) => `${a.given} ${a.family}`).join(', ') : '',
-                        pages: undefined, // Crossref often lacks page counts for books
+                        pages: undefined,
                         summary: summary,
                         year: item.published ? item.published['date-parts'][0][0] : undefined
                     };
@@ -292,13 +277,8 @@ export class LibraryService {
         return null;
     }
 
+    // Removed generic Wikipedia fallback as it was fetching incorrect summaries based solely on titles.
     private async fetchWikipediaSummary(title: string): Promise<string> {
-        try {
-            const response = await fetch(`https://es.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(title)}`);
-            const data = await response.json();
-            return data.extract || '';
-        } catch {
-            return '';
-        }
+        return '';
     }
 }

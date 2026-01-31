@@ -45,6 +45,20 @@ db.serialize(() => {
             console.log("Migration info (borrowed):", err.message);
         }
     });
+
+    // Migration for is_paper (default 1 for existing records)
+    db.run("ALTER TABLE books ADD COLUMN is_paper INTEGER DEFAULT 1", (err) => {
+        if (err && !err.message.includes("duplicate column name")) {
+            console.log("Migration info (is_paper):", err.message);
+        }
+    });
+
+    // Migration for is_digital (default 0)
+    db.run("ALTER TABLE books ADD COLUMN is_digital INTEGER DEFAULT 0", (err) => {
+        if (err && !err.message.includes("duplicate column name")) {
+            console.log("Migration info (is_digital):", err.message);
+        }
+    });
 });
 
 // Endpoints
@@ -53,23 +67,31 @@ app.get('/api/books', (req, res) => {
         if (err) {
             return res.status(500).json({ error: err.message });
         }
-        // Convert read and borrowed from 0/1 to boolean
+        // Convert integers to boolean
         const formattedBooks = rows.map(b => ({
             ...b,
             read: !!b.read,
-            borrowed: !!b.borrowed
+            borrowed: !!b.borrowed,
+            isPaper: b.is_paper === 1,
+            isDigital: b.is_digital === 1
         }));
         res.json(formattedBooks);
     });
 });
 
 app.post('/api/books', (req, res) => {
-    const { id, title, author, isbn, pages, read, summary, genre, year, borrowed } = req.body;
+    const { id, title, author, isbn, pages, read, summary, genre, year, borrowed, isPaper, isDigital } = req.body;
     const sql = `
-    INSERT INTO books (id, title, author, isbn, pages, read, summary, genre, year, borrowed)
-    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    INSERT INTO books (id, title, author, isbn, pages, read, summary, genre, year, borrowed, is_paper, is_digital)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
   `;
-    db.run(sql, [id, title, author, isbn, pages, read ? 1 : 0, summary, genre, year, borrowed ? 1 : 0], (err) => {
+    db.run(sql, [
+        id, title, author, isbn, pages,
+        read ? 1 : 0, summary, genre, year,
+        borrowed ? 1 : 0,
+        isPaper ? 1 : 0,
+        isDigital ? 1 : 0
+    ], (err) => {
         if (err) {
             return res.status(500).json({ error: err.message });
         }
@@ -79,13 +101,20 @@ app.post('/api/books', (req, res) => {
 
 app.put('/api/books/:id', (req, res) => {
     const { id } = req.params;
-    const { title, author, isbn, pages, read, summary, genre, year, borrowed } = req.body;
+    const { title, author, isbn, pages, read, summary, genre, year, borrowed, isPaper, isDigital } = req.body;
     const sql = `
     UPDATE books 
-    SET title = ?, author = ?, isbn = ?, pages = ?, read = ?, summary = ?, genre = ?, year = ?, borrowed = ?
+    SET title = ?, author = ?, isbn = ?, pages = ?, read = ?, summary = ?, genre = ?, year = ?, borrowed = ?, is_paper = ?, is_digital = ?
     WHERE id = ?
   `;
-    db.run(sql, [title, author, isbn, pages, read ? 1 : 0, summary, genre, year, borrowed ? 1 : 0, id], (err) => {
+    db.run(sql, [
+        title, author, isbn, pages,
+        read ? 1 : 0, summary, genre, year,
+        borrowed ? 1 : 0,
+        isPaper ? 1 : 0,
+        isDigital ? 1 : 0,
+        id // id is the LAST parameter for WHERE clause
+    ], (err) => {
         if (err) {
             return res.status(500).json({ error: err.message });
         }

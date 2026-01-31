@@ -65,7 +65,7 @@ import { CommonModule } from '@angular/common';
                      class="zen-input" placeholder="Ej. 2024">
             </div>
             <div class="input-group">
-              <label>Estado</label>
+              <label>Estado y Formato</label>
               <div class="zen-checkbox">
                 <input type="checkbox" id="read" name="read" [(ngModel)]="formState().read">
                 <span style="font-size: 0.95rem; font-weight: 500;">Leído</span>
@@ -73,6 +73,16 @@ import { CommonModule } from '@angular/common';
               <div class="zen-checkbox">
                 <input type="checkbox" id="borrowed" name="borrowed" [(ngModel)]="formState().borrowed">
                 <span style="font-size: 0.95rem; font-weight: 500;">Prestado</span>
+              </div>
+               <div style="display: flex; gap: 1rem; margin-top: 0.5rem;">
+                <div class="zen-checkbox">
+                    <input type="checkbox" id="isPaper" name="isPaper" [(ngModel)]="formState().isPaper">
+                    <span style="font-size: 0.95rem; font-weight: 500;">Papel</span>
+                </div>
+                <div class="zen-checkbox">
+                    <input type="checkbox" id="isDigital" name="isDigital" [(ngModel)]="formState().isDigital">
+                    <span style="font-size: 0.95rem; font-weight: 500;">Digital</span>
+                </div>
               </div>
             </div>
           </div>
@@ -128,6 +138,16 @@ import { CommonModule } from '@angular/common';
                 @if (book.borrowed) {
                   <span class="badge-zen" style="margin-left: 0.5rem; border-color: #fca5a5; color: #fca5a5;">
                     PRESTADO
+                  </span>
+                }
+                @if (book.isPaper) {
+                    <span class="badge-zen" style="margin-left: 0.5rem; border-color: #a5f3fc; color: #a5f3fc;">
+                    PAPEL
+                  </span>
+                }
+                @if (book.isDigital) {
+                    <span class="badge-zen" style="margin-left: 0.5rem; border-color: #c4b5fd; color: #c4b5fd;">
+                    DIGITAL
                   </span>
                 }
               </div>
@@ -205,6 +225,8 @@ export class App {
     genre: string;
     year?: number;
     borrowed: boolean;
+    isPaper: boolean;
+    isDigital: boolean;
   }>({
     title: '',
     author: '',
@@ -214,7 +236,9 @@ export class App {
     summary: '',
     genre: '',
     year: undefined,
-    borrowed: false
+    borrowed: false,
+    isPaper: false,
+    isDigital: false
   });
 
   totalBooks = computed(() => this.library.books().length);
@@ -294,7 +318,9 @@ export class App {
         summary: data.summary || prev.summary,
         year: data.year || prev.year,
         // Keep existing borrowed status or default to false
-        borrowed: prev.borrowed
+        borrowed: prev.borrowed,
+        isPaper: prev.isPaper,
+        isDigital: prev.isDigital
       }));
     }
     this.isLoading.set(false);
@@ -333,7 +359,9 @@ export class App {
           summary: state.summary,
           genre: state.genre,
           year: state.year,
-          borrowed: state.borrowed
+          borrowed: state.borrowed,
+          isPaper: state.isPaper,
+          isDigital: state.isDigital
         };
         await this.library.addBook(newBook);
       }
@@ -353,7 +381,9 @@ export class App {
       summary: book.summary,
       genre: book.genre,
       year: book.year,
-      borrowed: !!book.borrowed
+      borrowed: !!book.borrowed,
+      isPaper: !!book.isPaper,
+      isDigital: !!book.isDigital
     });
     if (book.summary) this.showSummaryField.set(true);
     window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -374,7 +404,9 @@ export class App {
       summary: '',
       genre: '',
       year: undefined,
-      borrowed: false
+      borrowed: false,
+      isPaper: false,
+      isDigital: false
     });
   }
 
