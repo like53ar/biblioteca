@@ -2,16 +2,16 @@ import { Injectable, signal, computed, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Book } from './book.model';
 import { firstValueFrom } from 'rxjs';
+import { StorageService } from './storage.service';
 
 @Injectable({
     providedIn: 'root'
 })
 export class LibraryService {
-    private readonly STORAGE_KEY = 'angular_books';
     private readonly API_URL = 'http://localhost:3000/api/books';
     private http = inject(HttpClient);
+    private storage = inject(StorageService);
     private booksSignal = signal<Book[]>([]);
-    private migrated = signal(false);
 
     books = computed(() => this.booksSignal());
 
@@ -21,45 +21,22 @@ export class LibraryService {
 
     private async initializeBooks() {
         try {
-            // Try to load from backend first
+            // 1. Try to load from backend
             const backendBooks = await firstValueFrom(this.http.get<Book[]>(this.API_URL));
 
-            // If backend is empty, check localStorage for migration
-            if (backendBooks.length === 0 && !this.migrated()) {
-                const localBooks = this.loadFromLocalStorage();
-                if (localBooks.length > 0) {
-                    console.log('📦 Migrando libros desde localStorage a la base de datos...');
-                    // Migrate each book to backend
-                    for (const book of localBooks) {
-                        await firstValueFrom(this.http.post(this.API_URL, book));
-                    }
-                    this.migrated.set(true);
-                    // Clear localStorage after successful migration
-                    localStorage.removeItem(this.STORAGE_KEY);
-                    console.log('✅ Migración completada');
-                    // Reload from backend
-                    const migratedBooks = await firstValueFrom(this.http.get<Book[]>(this.API_URL));
-                    this.booksSignal.set(migratedBooks);
-                } else {
-                    this.booksSignal.set([]);
-                }
-            } else {
-                this.booksSignal.set(backendBooks);
-            }
+            // 2. If success, update state and cache to IndexedDB
+            this.booksSignal.set(backendBooks);
+            await this.storage.saveBooks(backendBooks);
 
-            // Verify and fix ISBN format for existing books
-            // Verify and fix ISBN format and backfill years
+            // 3. Verify and fix ISBN format for existing books
             await this.repairBookMetadata();
-        } catch (error) {
-            console.error('❌ Error conectando con el servidor. Usando localStorage como fallback.', error);
-            // Fallback to localStorage if backend is not available
-            this.booksSignal.set(this.loadFromLocalStorage());
-        }
-    }
 
-    private loadFromLocalStorage(): Book[] {
-        const saved = localStorage.getItem(this.STORAGE_KEY);
-        return saved ? JSON.parse(saved) : [];
+        } catch (error) {
+            console.error('❌ Error conectando con el servidor. Cargando desde IndexedDB.', error);
+            // 4. Fallback to IndexedDB if backend is not available
+            const localBooks = await this.storage.getAllBooks();
+            this.booksSignal.set(localBooks);
+        }
     }
 
     async repairBookMetadata() {
@@ -83,7 +60,7 @@ export class LibraryService {
             // 2. Backfill Year if missing
             if (!book.year && clean.length >= 10) {
                 console.log(`Fetching missing year for: ${book.title}`);
-                const metadata = await this.fetchBookByISBN(clean); // Use clean ISBN
+                const metadata = await this.fetchBookByISBN(clean);
                 if (metadata && metadata.year) {
                     updated.year = metadata.year;
                     needsUpdate = true;
@@ -97,14 +74,8 @@ export class LibraryService {
             }
 
             if (needsUpdate) {
-                console.log(`Updating metadata for ${book.title}...`);
-                try {
-                    await firstValueFrom(this.http.put(`${this.API_URL}/${book.id}`, updated));
-                    this.booksSignal.update(prev => prev.map(b => b.id === book.id ? updated : b));
-                    changed = true;
-                } catch (e) {
-                    console.error(`Failed to update metadata for ${book.title}`, e);
-                }
+                await this.updateBook(updated); // Uses the new update logic
+                changed = true;
             }
         }
 
@@ -114,47 +85,44 @@ export class LibraryService {
     }
 
     async addBook(book: Book) {
+        // Optimistic Update
+        this.booksSignal.update(prev => [...prev, book]);
+
         try {
             await firstValueFrom(this.http.post(this.API_URL, book));
-            this.booksSignal.update(prev => [...prev, book]);
+            await this.storage.addBook(book); // Sync local DB
         } catch (error) {
-            console.error('Error adding book:', error);
-            // Fallback to localStorage
-            this.booksSignal.update(prev => {
-                const updated = [...prev, book];
-                localStorage.setItem(this.STORAGE_KEY, JSON.stringify(updated));
-                return updated;
-            });
+            console.error('Error adding book to server (Offline mode):', error);
+            // Only save to local DB
+            await this.storage.addBook(book);
         }
     }
 
     async updateBook(book: Book) {
+        // Optimistic Update
+        this.booksSignal.update(prev => prev.map(b => b.id === book.id ? book : b));
+
         try {
             await firstValueFrom(this.http.put(`${this.API_URL}/${book.id}`, book));
-            this.booksSignal.update(prev => prev.map(b => b.id === book.id ? book : b));
+            await this.storage.updateBook(book); // Sync local DB
         } catch (error) {
-            console.error('Error updating book:', error);
-            // Fallback to localStorage
-            this.booksSignal.update(prev => {
-                const updated = prev.map(b => b.id === book.id ? book : b);
-                localStorage.setItem(this.STORAGE_KEY, JSON.stringify(updated));
-                return updated;
-            });
+            console.error('Error updating book on server (Offline mode):', error);
+            // Only save to local DB
+            await this.storage.updateBook(book);
         }
     }
 
     async deleteBook(id: string) {
+        // Optimistic Update
+        this.booksSignal.update(prev => prev.filter(b => b.id !== id));
+
         try {
             await firstValueFrom(this.http.delete(`${this.API_URL}/${id}`));
-            this.booksSignal.update(prev => prev.filter(b => b.id !== id));
+            await this.storage.deleteBook(id); // Sync local DB
         } catch (error) {
-            console.error('Error deleting book:', error);
-            // Fallback to localStorage
-            this.booksSignal.update(prev => {
-                const updated = prev.filter(b => b.id !== id);
-                localStorage.setItem(this.STORAGE_KEY, JSON.stringify(updated));
-                return updated;
-            });
+            console.error('Error deleting book on server (Offline mode):', error);
+            // Only update local DB
+            await this.storage.deleteBook(id);
         }
     }
 
@@ -165,6 +133,88 @@ export class LibraryService {
             await this.updateBook(updatedBook);
         }
     }
+
+    // --- Export / Import ---
+
+    exportBooks(format: 'json' | 'csv') {
+        const books = this.booksSignal();
+        let content: string;
+        let mimeType: string;
+        let extension: string;
+
+        if (format === 'json') {
+            content = JSON.stringify(books, null, 2);
+            mimeType = 'application/json';
+            extension = 'json';
+        } else {
+            // CSV Header
+            const headers = ['id', 'title', 'author', 'isbn', 'pages', 'read', 'summary', 'genre', 'year', 'borrowed', 'isPaper', 'isDigital'];
+            const rows = books.map(b => [
+                JSON.stringify(b.id),
+                JSON.stringify(b.title),
+                JSON.stringify(b.author),
+                JSON.stringify(b.isbn),
+                b.pages,
+                b.read,
+                JSON.stringify(b.summary || ''),
+                JSON.stringify(b.genre || ''),
+                b.year || '',
+                b.borrowed || false,
+                b.isPaper || false,
+                b.isDigital || false
+            ].join(','));
+            content = [headers.join(','), ...rows].join('\n');
+            mimeType = 'text/csv';
+            extension = 'csv';
+        }
+
+        const blob = new Blob([content], { type: mimeType });
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `biblioteca_backup_${new Date().toISOString().split('T')[0]}.${extension}`;
+        a.click();
+        window.URL.revokeObjectURL(url);
+    }
+
+    async importBooks(file: File) {
+        const text = await file.text();
+        let importedBooks: Book[] = [];
+
+        try {
+            if (file.name.endsWith('.json')) {
+                importedBooks = JSON.parse(text);
+            } else if (file.name.endsWith('.csv')) {
+                // Quick CSV parser warning
+                alert('La importación de CSV es limitada (solo visualización). Por favor use JSON para restaurar copias de seguridad completas.');
+                return;
+            }
+
+            if (!Array.isArray(importedBooks)) throw new Error('Formato inválido');
+
+            console.log(`📥 Importando ${importedBooks.length} libros...`);
+
+            for (const book of importedBooks) {
+                // Check if exists
+                const exists = this.booksSignal().find(b => b.id === book.id || b.isbn === book.isbn);
+                if (!exists) {
+                    await this.addBook(book);
+                } else {
+                    if (exists.id === book.id) {
+                        await this.updateBook(book);
+                    }
+                }
+            }
+            alert('✅ Importación completada');
+
+        } catch (e) {
+            console.error('Import error:', e);
+            alert('❌ Error al importar el archivo. Asegúrese de que sea un JSON válido.');
+        }
+    }
+
+
+    // --- API Fetching Methods (Unchanged) ---
 
     async fetchBookByISBN(isbn: string): Promise<Partial<Book> | null> {
         const cleanISBN = isbn.replace(/[-\s]/g, '');

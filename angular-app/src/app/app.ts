@@ -12,6 +12,12 @@ import { CommonModule } from '@angular/common';
     <div class="zen-wrapper">
       <div class="stats-zen">
         Cant. Libros Disponibles: {{ totalBooks() }}
+        <div class="data-actions">
+            <button class="btn-text-zen-small" (click)="uploadInput.click()">Importar JSON</button>
+            <button class="btn-text-zen-small" (click)="exportData('json')">Exportar JSON</button>
+            <button class="btn-text-zen-small" (click)="exportData('csv')">Exportar CSV</button>
+        </div>
+        <input #uploadInput type="file" (change)="onFileSelected($event)" accept=".json" style="display: none;">
       </div>
       <header>
         <h1>Mi Biblioteca</h1>
@@ -189,8 +195,30 @@ import { CommonModule } from '@angular/common';
       </section>
     </div>
   `,
-  styles: [],
+  styles: [`
+    .data-actions {
+        margin-top: 0.5rem;
+        display: flex;
+        gap: 1rem;
+        font-size: 0.8rem;
+    }
+    .btn-text-zen-small {
+        background: none;
+        border: none;
+        color: var(--text-muted);
+        cursor: pointer;
+        padding: 0;
+        text-decoration: underline;
+        opacity: 0.7;
+        transition: opacity 0.2s;
+    }
+    .btn-text-zen-small:hover {
+        opacity: 1;
+        color: var(--color-accent);
+    }
+  `],
 })
+
 export class App {
   library = inject(LibraryService);
 
@@ -420,5 +448,16 @@ export class App {
       ...book,
       borrowed: !book.borrowed
     });
+  }
+
+  exportData(format: 'json' | 'csv') {
+    this.library.exportBooks(format);
+  }
+
+  onFileSelected(event: any) {
+    const file = event.target.files[0];
+    if (file) {
+      this.library.importBooks(file);
+    }
   }
 }
