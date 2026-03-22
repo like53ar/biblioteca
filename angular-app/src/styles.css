@@ -21,8 +21,8 @@
     --border-hairline: 1px solid rgba(255, 255, 255, 0.05);
 
     /* Espaciado Maestro Zen Compacto */
-    --master-gap: 2.5rem;
-    --label-input-gap: 0.8rem;
+    --master-gap: 1.5rem;
+    --label-input-gap: 0.4rem;
 
     --radius-luxe: 24px;
 }
@@ -85,10 +85,10 @@ header p {
 .zen-form-container {
     background: var(--surface-zen);
     border-radius: var(--radius-luxe);
-    padding: 3rem 4rem;
+    padding: 1.5rem 2.5rem;
     box-shadow: 0 40px 100px rgba(0, 0, 0, 0.5);
     border: var(--border-hairline);
-    margin-bottom: 6rem;
+    margin-bottom: 3rem;
     backdrop-filter: blur(20px);
 
     /* Constrain the form width */
@@ -126,12 +126,12 @@ label {
 
 .zen-input {
     width: 100%;
-    padding: 1rem 0;
+    padding: 0.5rem 0;
     background: transparent;
     border: none;
     border-bottom: 1px solid rgba(255, 255, 255, 0.1);
     font-family: inherit;
-    font-size: 1.3rem;
+    font-size: 1.15rem;
     color: var(--text-primary);
     outline: none;
     border-radius: 0;
@@ -151,7 +151,7 @@ label {
     padding-right: 2rem;
     appearance: none;
     font-family: inherit;
-    font-size: 1.3rem;
+    font-size: 1.15rem;
     color: var(--text-primary);
 }
 
@@ -208,7 +208,7 @@ input[type=number] {
 .zen-grid {
     display: grid;
     grid-template-columns: 1fr 1fr;
-    gap: 3rem;
+    gap: 1.5rem;
 }
 
 .zen-checkbox {
@@ -231,13 +231,12 @@ input[type="checkbox"] {
     background: var(--text-primary);
     color: #000;
     border: none;
-    padding: 1.25rem;
+    padding: 1rem;
     border-radius: 100px;
-    /* Botón de píldora lunar */
-    font-size: 1.05rem;
+    font-size: 1rem;
     font-weight: 600;
     cursor: pointer;
-    margin-top: 1rem;
+    margin-top: 0.5rem;
     transition: all 0.3s ease;
 }
 
