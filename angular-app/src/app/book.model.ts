@@ -1,3 +1,4 @@
+// Definición de la entidad libro para el sistema Zen
 export interface Book {
     id: string;
     title: string;
@@ -11,5 +12,4 @@ export interface Book {
     borrowed?: boolean;
     isPaper?: boolean;
     isDigital?: boolean;
-    coverUrl?: string;
 }

@@ -137,13 +137,7 @@ import { CommonModule } from '@angular/common';
         <div class="book-grid-zen">
           @for (book of filteredBooks(); track book.id) {
             <article class="book-item-zen">
-              <div class="item-header" style="align-items: flex-start; gap: 1.5rem;">
-                @if (book.coverUrl && !book.coverUrl.endsWith('-M.jpg')) {
-                  <img [src]="book.coverUrl" alt="Portada" style="width: 70px; height: 105px; object-fit: cover; border-radius: 6px; box-shadow: 0 4px 10px rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.05); flex-shrink: 0;">
-                } @else if (book.coverUrl && book.coverUrl.endsWith('-M.jpg')) {
-                  <img [src]="book.coverUrl" alt="Portada" style="width: 70px; height: 105px; object-fit: cover; border-radius: 6px; box-shadow: 0 4px 10px rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.05); flex-shrink: 0; background-color: rgba(255,255,255,0.05);" onerror="this.style.display='none'">
-                }
-                
+              <div class="item-header">
                 <div style="flex: 1; min-width: 0;">
                   <h3 style="margin-bottom: 0.5rem;">{{ book.title }}</h3>
                   <div style="display: flex; flex-wrap: wrap; gap: 0.5rem;">
@@ -230,8 +224,9 @@ import { CommonModule } from '@angular/common';
   `],
 })
 
+// Componente principal de la Biblioteca Zen
 export class App {
-  library = inject(LibraryService);
+  public library = inject(LibraryService);
 
   @ViewChild('isbnInput') isbnInput!: ElementRef;
 
@@ -266,7 +261,6 @@ export class App {
     borrowed: boolean;
     isPaper: boolean;
     isDigital: boolean;
-    coverUrl?: string;
   }>({
     title: '',
     author: '',
@@ -278,8 +272,7 @@ export class App {
     year: undefined,
     borrowed: false,
     isPaper: false,
-    isDigital: false,
-    coverUrl: ''
+    isDigital: false
   });
 
   totalBooks = computed(() => this.library.books().length);
@@ -358,11 +351,9 @@ export class App {
         pages: data.pages || prev.pages,
         summary: data.summary || prev.summary,
         year: data.year || prev.year,
-        // Keep existing borrowed status or default to false
         borrowed: prev.borrowed,
         isPaper: prev.isPaper,
-        isDigital: prev.isDigital,
-        coverUrl: data.coverUrl || prev.coverUrl
+        isDigital: prev.isDigital
       }));
     }
     this.isLoading.set(false);
@@ -408,8 +399,7 @@ export class App {
           year: state.year,
           borrowed: state.borrowed,
           isPaper: state.isPaper,
-          isDigital: state.isDigital,
-          coverUrl: state.coverUrl
+          isDigital: state.isDigital
         };
         await this.library.addBook(newBook);
       }
@@ -431,8 +421,7 @@ export class App {
       year: book.year,
       borrowed: !!book.borrowed,
       isPaper: !!book.isPaper,
-      isDigital: !!book.isDigital,
-      coverUrl: book.coverUrl || ''
+      isDigital: !!book.isDigital
     });
     if (book.summary) this.showSummaryField.set(true);
     window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -455,8 +444,7 @@ export class App {
       year: undefined,
       borrowed: false,
       isPaper: false,
-      isDigital: false,
-      coverUrl: ''
+      isDigital: false
     });
   }
 

@@ -310,14 +310,12 @@ input[type="checkbox"] {
     border: var(--border-hairline);
     display: flex;
     flex-direction: column;
-    gap: 1.5rem;
+    gap: 1.25rem;
     animation: fadeInZen 0.8s ease backwards;
     transition: transform 0.3s ease, box-shadow 0.3s ease;
-    height: 480px;
-    /* Fixed height for uniformity */
-    overflow: hidden;
-    /* Hide overflow */
-    justify-content: space-between;
+    min-height: 480px;
+    height: auto;
+    justify-content: flex-start;
 }
 
 .book-item-zen:hover {
@@ -371,12 +369,13 @@ input[type="checkbox"] {
 }
 
 .item-author {
-    font-size: 1.1rem;
+    font-size: 1.15rem;
     color: var(--text-secondary);
     font-weight: 300;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
+    line-height: 1.4;
+    margin-bottom: 0.5rem;
+    display: block;
+    word-wrap: break-word;
 }
 
 .item-meta {
@@ -399,19 +398,14 @@ input[type="checkbox"] {
     font-style: italic;
     border-left: 1px solid rgba(255, 255, 255, 0.1);
     padding-left: 1rem;
+    margin-top: 1rem;
+    margin-bottom: 2rem;
 
-    /* Truncate text after 3 lines */
+    /* Truncate text after 6 lines to save space in grid */
     display: -webkit-box;
-    -webkit-line-clamp: 5;
+    -webkit-line-clamp: 6;
     -webkit-box-orient: vertical;
     overflow: hidden;
-    text-overflow: ellipsis;
-
-    max-height: 150px;
-    /* Constrain height */
-    flex-grow: 0;
-    /* Don't expand */
-    margin-bottom: auto;
 }
 
 .item-actions {

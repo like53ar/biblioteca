@@ -59,6 +59,13 @@ db.serialize(() => {
             console.log("Migration info (is_digital):", err.message);
         }
     });
+
+    // Migration for cover_url
+    db.run("ALTER TABLE books ADD COLUMN cover_url TEXT", (err) => {
+        if (err && !err.message.includes("duplicate column name")) {
+            console.log("Migration info (cover_url):", err.message);
+        }
+    });
 });
 
 // Endpoints
@@ -73,24 +80,26 @@ app.get('/api/books', (req, res) => {
             read: !!b.read,
             borrowed: !!b.borrowed,
             isPaper: b.is_paper === 1,
-            isDigital: b.is_digital === 1
+            isDigital: b.is_digital === 1,
+            coverUrl: b.cover_url
         }));
         res.json(formattedBooks);
     });
 });
 
 app.post('/api/books', (req, res) => {
-    const { id, title, author, isbn, pages, read, summary, genre, year, borrowed, isPaper, isDigital } = req.body;
+    const { id, title, author, isbn, pages, read, summary, genre, year, borrowed, isPaper, isDigital, coverUrl } = req.body;
     const sql = `
-    INSERT INTO books (id, title, author, isbn, pages, read, summary, genre, year, borrowed, is_paper, is_digital)
-    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    INSERT INTO books (id, title, author, isbn, pages, read, summary, genre, year, borrowed, is_paper, is_digital, cover_url)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
   `;
     db.run(sql, [
         id, title, author, isbn, pages,
         read ? 1 : 0, summary, genre, year,
         borrowed ? 1 : 0,
         isPaper ? 1 : 0,
-        isDigital ? 1 : 0
+        isDigital ? 1 : 0,
+        coverUrl
     ], (err) => {
         if (err) {
             return res.status(500).json({ error: err.message });
@@ -101,10 +110,10 @@ app.post('/api/books', (req, res) => {
 
 app.put('/api/books/:id', (req, res) => {
     const { id } = req.params;
-    const { title, author, isbn, pages, read, summary, genre, year, borrowed, isPaper, isDigital } = req.body;
+    const { title, author, isbn, pages, read, summary, genre, year, borrowed, isPaper, isDigital, coverUrl } = req.body;
     const sql = `
     UPDATE books 
-    SET title = ?, author = ?, isbn = ?, pages = ?, read = ?, summary = ?, genre = ?, year = ?, borrowed = ?, is_paper = ?, is_digital = ?
+    SET title = ?, author = ?, isbn = ?, pages = ?, read = ?, summary = ?, genre = ?, year = ?, borrowed = ?, is_paper = ?, is_digital = ?, cover_url = ?
     WHERE id = ?
   `;
     db.run(sql, [
@@ -113,6 +122,7 @@ app.put('/api/books/:id', (req, res) => {
         borrowed ? 1 : 0,
         isPaper ? 1 : 0,
         isDigital ? 1 : 0,
+        coverUrl,
         id // id is the LAST parameter for WHERE clause
     ], (err) => {
         if (err) {
