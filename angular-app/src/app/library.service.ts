@@ -334,7 +334,8 @@ export class LibraryService {
                     author: info.authors ? info.authors.join(', ') : '',
                     pages: info.pageCount,
                     summary: summary,
-                    year: info.publishedDate ? parseInt(info.publishedDate.substring(0, 4)) : undefined
+                    year: info.publishedDate ? parseInt(info.publishedDate.substring(0, 4)) : undefined,
+                    coverUrl: info.imageLinks ? (info.imageLinks.thumbnail || info.imageLinks.smallThumbnail).replace('http:', 'https:') : `https://covers.openlibrary.org/b/isbn/${isbn}-M.jpg`
                 };
             }
         } catch (error) {
@@ -367,7 +368,8 @@ export class LibraryService {
                     author: info.authors ? info.authors.map((a: any) => a.name).join(', ') : '',
                     pages: info.number_of_pages,
                     summary: summary,
-                    year: info.publish_date ? parseInt(info.publish_date.match(/\d{4}/)?.[0] || '0') : undefined
+                    year: info.publish_date ? parseInt(info.publish_date.match(/\d{4}/)?.[0] || '0') : undefined,
+                    coverUrl: info.cover?.medium || `https://covers.openlibrary.org/b/isbn/${isbn}-M.jpg`
                 };
             }
         } catch (error) {
@@ -389,7 +391,8 @@ export class LibraryService {
                     author: info.author_name ? info.author_name.join(', ') : '',
                     pages: info.number_of_pages_median || undefined,
                     summary: '',
-                    year: info.first_publish_year || (info.publish_year ? Math.min(...info.publish_year) : undefined)
+                    year: info.first_publish_year || (info.publish_year ? Math.min(...info.publish_year) : undefined),
+                    coverUrl: `https://covers.openlibrary.org/b/isbn/${isbn}-M.jpg`
                 };
             }
         } catch (error) {

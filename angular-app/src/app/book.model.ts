@@ -11,4 +11,5 @@ export interface Book {
     borrowed?: boolean;
     isPaper?: boolean;
     isDigital?: boolean;
+    coverUrl?: string;
 }

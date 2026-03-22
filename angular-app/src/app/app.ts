@@ -137,26 +137,36 @@ import { CommonModule } from '@angular/common';
         <div class="book-grid-zen">
           @for (book of filteredBooks(); track book.id) {
             <article class="book-item-zen">
-              <div class="item-header">
-                <h3>{{ book.title }}</h3>
-                <span class="badge-zen">
-                  {{ book.read ? 'LEÍDO' : 'PENDIENTE' }}
-                </span>
-                @if (book.borrowed) {
-                  <span class="badge-zen" style="margin-left: 0.5rem; border-color: #fca5a5; color: #fca5a5;">
-                    PRESTADO
-                  </span>
+              <div class="item-header" style="align-items: flex-start; gap: 1.5rem;">
+                @if (book.coverUrl && !book.coverUrl.endsWith('-M.jpg')) {
+                  <img [src]="book.coverUrl" alt="Portada" style="width: 70px; height: 105px; object-fit: cover; border-radius: 6px; box-shadow: 0 4px 10px rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.05); flex-shrink: 0;">
+                } @else if (book.coverUrl && book.coverUrl.endsWith('-M.jpg')) {
+                  <img [src]="book.coverUrl" alt="Portada" style="width: 70px; height: 105px; object-fit: cover; border-radius: 6px; box-shadow: 0 4px 10px rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.05); flex-shrink: 0; background-color: rgba(255,255,255,0.05);" onerror="this.style.display='none'">
                 }
-                @if (book.isPaper) {
-                    <span class="badge-zen" style="margin-left: 0.5rem; border-color: #a5f3fc; color: #a5f3fc;">
-                    PAPEL
-                  </span>
-                }
-                @if (book.isDigital) {
-                    <span class="badge-zen" style="margin-left: 0.5rem; border-color: #c4b5fd; color: #c4b5fd;">
-                    DIGITAL
-                  </span>
-                }
+                
+                <div style="flex: 1; min-width: 0;">
+                  <h3 style="margin-bottom: 0.5rem;">{{ book.title }}</h3>
+                  <div style="display: flex; flex-wrap: wrap; gap: 0.5rem;">
+                    <span class="badge-zen">
+                      {{ book.read ? 'LEÍDO' : 'PENDIENTE' }}
+                    </span>
+                    @if (book.borrowed) {
+                      <span class="badge-zen" style="border-color: #fca5a5; color: #fca5a5;">
+                        PRESTADO
+                      </span>
+                    }
+                    @if (book.isPaper) {
+                        <span class="badge-zen" style="border-color: #a5f3fc; color: #a5f3fc;">
+                        PAPEL
+                      </span>
+                    }
+                    @if (book.isDigital) {
+                        <span class="badge-zen" style="border-color: #c4b5fd; color: #c4b5fd;">
+                        DIGITAL
+                      </span>
+                    }
+                  </div>
+                </div>
               </div>
               
               <div class="item-author">{{ book.author }}</div>
@@ -256,6 +266,7 @@ export class App {
     borrowed: boolean;
     isPaper: boolean;
     isDigital: boolean;
+    coverUrl?: string;
   }>({
     title: '',
     author: '',
@@ -267,7 +278,8 @@ export class App {
     year: undefined,
     borrowed: false,
     isPaper: false,
-    isDigital: false
+    isDigital: false,
+    coverUrl: ''
   });
 
   totalBooks = computed(() => this.library.books().length);
@@ -349,7 +361,8 @@ export class App {
         // Keep existing borrowed status or default to false
         borrowed: prev.borrowed,
         isPaper: prev.isPaper,
-        isDigital: prev.isDigital
+        isDigital: prev.isDigital,
+        coverUrl: data.coverUrl || prev.coverUrl
       }));
     }
     this.isLoading.set(false);
@@ -395,7 +408,8 @@ export class App {
           year: state.year,
           borrowed: state.borrowed,
           isPaper: state.isPaper,
-          isDigital: state.isDigital
+          isDigital: state.isDigital,
+          coverUrl: state.coverUrl
         };
         await this.library.addBook(newBook);
       }
@@ -417,7 +431,8 @@ export class App {
       year: book.year,
       borrowed: !!book.borrowed,
       isPaper: !!book.isPaper,
-      isDigital: !!book.isDigital
+      isDigital: !!book.isDigital,
+      coverUrl: book.coverUrl || ''
     });
     if (book.summary) this.showSummaryField.set(true);
     window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -440,7 +455,8 @@ export class App {
       year: undefined,
       borrowed: false,
       isPaper: false,
-      isDigital: false
+      isDigital: false,
+      coverUrl: ''
     });
   }
 
