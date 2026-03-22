@@ -205,11 +205,11 @@ export class LibraryService {
                     }
                 }
             }
-            alert('✅ Importación completada');
+            alert('Sistema: Importación completada con éxito');
 
         } catch (e) {
             console.error('Import error:', e);
-            alert('❌ Error al importar el archivo. Asegúrese de que sea un JSON válido.');
+            alert('Error al importar el archivo. Asegúrese de que sea un JSON válido.');
         }
     }
 

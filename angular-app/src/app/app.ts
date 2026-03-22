@@ -16,6 +16,7 @@ import { CommonModule } from '@angular/common';
             <button class="btn-text-zen-small" (click)="uploadInput.click()">Importar JSON</button>
             <button class="btn-text-zen-small" (click)="exportData('json')">Exportar JSON</button>
             <button class="btn-text-zen-small" (click)="exportData('csv')">Exportar CSV</button>
+            <button class="btn-text-zen-small" (click)="printStickers()">Imprimir Fichas</button>
         </div>
         <input #uploadInput type="file" (change)="onFileSelected($event)" accept=".json" style="display: none;">
       </div>
@@ -33,7 +34,7 @@ import { CommonModule } from '@angular/common';
             <div class="isbn-field">
               <input type="text" #isbnInput id="isbn" name="isbn" [(ngModel)]="formState().isbn" 
                      (input)="onIsbnInput()" class="zen-input" placeholder="Pulse para escribir...">
-              <button type="button" (click)="manualFetch()" class="btn-zen-sync" title="Sincronizar">🔍</button>
+              <button type="button" (click)="manualFetch()" class="btn-zen-sync" title="Buscar en red" style="font-size: 0.85rem; width: auto; height: auto; padding: 0.5rem 1rem; border-radius: 8px;">Buscar</button>
             </div>
           </div>
 
@@ -205,16 +206,16 @@ import { CommonModule } from '@angular/common';
     .btn-text-zen-small {
         background: none;
         border: none;
-        color: var(--text-muted);
+        color: var(--text-primary);
         cursor: pointer;
         padding: 0;
         text-decoration: underline;
-        opacity: 0.7;
-        transition: opacity 0.2s;
+        opacity: 0.9;
+        transition: opacity 0.2s, color 0.2s;
     }
     .btn-text-zen-small:hover {
         opacity: 1;
-        color: var(--color-accent);
+        color: var(--accent);
     }
   `],
 })
@@ -312,7 +313,7 @@ export class App {
       // Check for duplicates before fetching
       const duplicate = this.library.books().find(b => b.isbn.replace(/\D/g, '') === value);
       if (duplicate) {
-        alert(`⚠️ El libro con ISBN ${value} ya existe en la biblioteca:\n"${duplicate.title}"`);
+        alert(`Atención: El libro con ISBN ${value} ya existe en la biblioteca:\n"${duplicate.title}"`);
         return;
       }
 
@@ -326,7 +327,7 @@ export class App {
     // Check for duplicates
     const duplicate = this.library.books().find(b => b.isbn.replace(/\D/g, '') === rawIsbn);
     if (duplicate) {
-      alert(`⚠️ El libro con ISBN ${rawIsbn} ya existe en la biblioteca:\n"${duplicate.title}"`);
+      alert(`Atención: El libro con ISBN ${rawIsbn} ya existe en la biblioteca:\n"${duplicate.title}"`);
       return;
     }
 
@@ -360,7 +361,7 @@ export class App {
     if (state.title && state.author && state.isbn) {
       // Validation: Must be Paper or Digital
       if (!state.isPaper && !state.isDigital) {
-        alert('⚠️ Por favor, indique si el libro es formato Papel o Digital (o ambos) antes de continuar.');
+        alert('Atención: Por favor, indique si el libro es formato Papel o Digital (o ambos) antes de continuar.');
         return;
       }
 
@@ -371,7 +372,7 @@ export class App {
       );
 
       if (duplicate) {
-        alert(`⚠️ No se puede guardar. El libro con ISBN ${cleanIsbn} ya existe:\n"${duplicate.title}"`);
+        alert(`Atención: No se puede guardar. El libro con ISBN ${cleanIsbn} ya existe:\n"${duplicate.title}"`);
         return;
       }
 
@@ -448,6 +449,126 @@ export class App {
       ...book,
       borrowed: !book.borrowed
     });
+  }
+
+  printStickers() {
+    const paperBooks = this.library.books().filter(b => b.isPaper);
+    const sortedBooks = [...paperBooks].sort((a, b) => a.title.localeCompare(b.title));
+
+    if (sortedBooks.length === 0) {
+      alert('Sistema: No hay libros en formato Papel para imprimir fichas.');
+      return;
+    }
+
+    const printWindow = window.open('', '_blank');
+    if (!printWindow) {
+      alert('Por favor permita las ventanas emergentes (pop-ups) para imprimir las fichas.');
+      return;
+    }
+
+    let htmlContent = `
+    <!DOCTYPE html>
+    <html lang="es">
+    <head>
+        <meta charset="UTF-8">
+        <title>Fichas de Biblioteca</title>
+        <style>
+            @page {
+                size: A4;
+                margin: 0;
+            }
+            body {
+                margin: 0;
+                padding: 0;
+                font-family: Arial, sans-serif;
+                background-color: white;
+                color: black;
+            }
+            .page-container {
+                display: grid;
+                grid-template-columns: repeat(2, 105mm);
+                grid-auto-rows: 48mm;
+                width: 210mm;
+                margin: 0 auto;
+            }
+            .sticker {
+                width: 105mm;
+                height: 48mm;
+                box-sizing: border-box;
+                padding: 4mm 6mm;
+                display: flex;
+                flex-direction: column;
+                justify-content: center;
+                page-break-inside: avoid;
+                border: 1px solid #555; 
+            }
+            .sticker-header {
+                font-weight: bold;
+                font-size: 13pt;
+                text-align: center;
+                margin-bottom: 2mm;
+                border-bottom: 2px solid black;
+                padding-bottom: 1mm;
+                letter-spacing: 1px;
+            }
+            .sticker-field {
+                font-size: 10pt;
+                margin-bottom: 2mm;
+                white-space: nowrap;
+                overflow: hidden;
+                text-overflow: ellipsis;
+            }
+            .sticker-field strong {
+                font-size: 9pt;
+                color: #000;
+            }
+            .row {
+                display: flex;
+                justify-content: space-between;
+                gap: 2mm;
+            }
+            @media screen {
+                body { background: #555; display: flex; flex-direction: column; align-items: center; padding: 20px; gap: 10px; }
+                .sticker { background: white; border-color: #ccc; box-shadow: 0 0 5px rgba(0,0,0,0.5); }
+            }
+        </style>
+    </head>
+    <body>
+        <div class="page-container">
+    `;
+
+    sortedBooks.forEach(book => {
+        let formatStr = 'Papel';
+        if (book.isPaper && book.isDigital) formatStr = 'Papel / Digital';
+        else if (book.isDigital) formatStr = 'Digital';
+        
+        htmlContent += `
+        <div class="sticker">
+            <div class="sticker-header">FICHA DE BIBLIOTECA</div>
+            <div class="sticker-field"><strong>Título:</strong> ${book.title}</div>
+            <div class="sticker-field"><strong>Autor:</strong> ${book.author}</div>
+            <div class="sticker-field"><strong>Género:</strong> ${book.genre || 'S/D'}</div>
+            <div class="row">
+                <div class="sticker-field"><strong>Edición:</strong> ${book.year || 'S/D'}</div>
+                <div class="sticker-field"><strong>Formato:</strong> ${formatStr}</div>
+            </div>
+        </div>
+        `;
+    });
+
+    htmlContent += `
+        </div>
+    </body>
+    <script>
+        window.onload = function() {
+            setTimeout(function() { window.print(); }, 500);
+        }
+    </script>
+    </html>
+    `;
+
+    printWindow.document.write(htmlContent);
+    printWindow.document.close();
   }
 
   exportData(format: 'json' | 'csv') {

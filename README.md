@@ -11,6 +11,8 @@ Un sistema de gestión de bibliotecas moderno, diseñado con una estética "Zen"
 -   **Base de Datos Híbrida**:
     -   **Frontend**: IndexedDB para acceso instantáneo y caché.
     -   **Backend**: SQLite para persistencia robusta.
+-   **Fichas para Imprimir (Novedad)**: Generador automático de PDF para múltiples etiquetas (105mm x 48mm optimizadas para A4) de los libros físicos.
+-   **Traducción Inmunizada**: Bloqueos activos (`translate="no"`) para proteger el DOM de interrupciones causadas por Google Translate de Chrome.
 -   **Importación/Exportación**: Respalda tu colección en JSON o CSV.
 
 ## 🛠️ Tecnologías
