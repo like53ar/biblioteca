@@ -150,6 +150,7 @@ label {
     background-position: right center;
     padding-right: 2rem;
     appearance: none;
+    -webkit-appearance: none;
     font-family: inherit;
     font-size: 1.15rem;
     color: var(--text-primary);
@@ -169,11 +170,13 @@ label {
 input[type=number]::-webkit-inner-spin-button,
 input[type=number]::-webkit-outer-spin-button {
     -webkit-appearance: none;
+    appearance: none;
     margin: 0;
 }
 
 input[type=number] {
     -moz-appearance: textfield;
+    appearance: textfield;
 }
 
 /* ISBN con integración */
@@ -351,8 +354,7 @@ input[type="checkbox"] {
     /* Truncate title if too long */
     display: -webkit-box;
     -webkit-line-clamp: 2;
-    -webkit-line-clamp: 2;
-    /* Compatibility */
+    line-clamp: 2;
     -webkit-box-orient: vertical;
     overflow: hidden;
 }
@@ -403,6 +405,7 @@ input[type="checkbox"] {
     /* Truncate text after 6 lines to save space in grid */
     display: -webkit-box;
     -webkit-line-clamp: 6;
+    line-clamp: 6;
     -webkit-box-orient: vertical;
     overflow: hidden;
 }
