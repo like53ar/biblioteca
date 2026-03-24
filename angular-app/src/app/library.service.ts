@@ -8,7 +8,7 @@ import { StorageService } from './storage.service';
     providedIn: 'root'
 })
 export class LibraryService {
-    private readonly API_URL = 'http://localhost:3000/api/books';
+    private readonly API_URL = '/api/books';
     private http = inject(HttpClient);
     private storage = inject(StorageService);
     private booksSignal = signal<Book[]>([]);

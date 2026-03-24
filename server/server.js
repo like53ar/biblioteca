@@ -4,17 +4,20 @@ const sqlite3 = require('sqlite3').verbose();
 const path = require('path');
 
 const app = express();
-const port = 3000;
+const port = 4300;
 
 // Middleware
 app.use(cors());
 app.use(express.json());
 
+// Serve static files from the Angular app
+const angularAppPath = path.join(__dirname, '../angular-app/dist/angular-app/browser');
+app.use(express.static(angularAppPath));
+
 // Database setup
 const dbPath = path.join(__dirname, 'library.db');
 const db = new sqlite3.Database(dbPath);
 
-// Create table if not exists
 // Create table if not exists and handle migration
 db.serialize(() => {
     db.run(`
@@ -142,7 +145,13 @@ app.delete('/api/books/:id', (req, res) => {
     });
 });
 
+// Catch-all route to serve Angular's index.html for any non-API request
+app.get(/^(?!\/api).*/, (req, res) => {
+    res.sendFile(path.join(angularAppPath, 'index.html'));
+});
+
 app.listen(port, () => {
-    console.log(`✅ Servidor corriendo en http://localhost:${port}`);
+    console.log(`✅ Biblioteca Zen corriendo en http://localhost:${port}`);
     console.log(`📚 Base de datos: ${dbPath}`);
+    console.log(`🌐 Sirviendo frontend desde: ${angularAppPath}`);
 });
