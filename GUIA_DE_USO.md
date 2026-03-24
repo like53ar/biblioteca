@@ -67,13 +67,13 @@ Para respaldar tus libros:
 - Verifica que no haya un firewall bloqueando
 
 ### El navegador no se abre
-- Abre manualmente: http://localhost:4200
+- Abre manualmente: http://localhost:4300
 - Los servidores seguirán funcionando en segundo plano
 
 ---
 
 ## 📊 URLs de la Aplicación
 
-- **Frontend (Interfaz):** http://localhost:4200
+- **Frontend (Interfaz):** http://localhost:4300
 - **Backend (API):** http://localhost:3000
 - **Base de Datos:** `server\library.db`

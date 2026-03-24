@@ -43,7 +43,7 @@
    - Una ventana que dice "Iniciando Biblioteca Zen"
    - Una ventana nueva con el servidor backend
    - Una ventana nueva con la aplicación Angular
-3. Espera unos segundos y abre tu navegador en: http://localhost:4200
+3. Espera unos segundos y abre tu navegador en: http://localhost:4300
 
 ## Solución de Problemas
 
@@ -60,4 +60,4 @@
 
 ### Si no se abre el navegador automáticamente
 - Abre manualmente tu navegador
-- Ve a: http://localhost:4200
+- Ve a: http://localhost:4300

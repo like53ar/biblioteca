@@ -45,7 +45,7 @@ Este proyecto utiliza las últimas tecnologías web:
     ```
 3.  **Iniciar**:
     Haz doble clic en el archivo `Iniciar_Biblioteca.bat` en la carpeta raíz.
-    Esto iniciará tanto el servidor (puerto 3000) como la aplicación Angular (puerto 4200) y abrirá tu navegador automáticamente.
+    Esto iniciará tanto el servidor (puerto 3000) como la aplicación Angular (puerto 4300) y abrirá tu navegador automáticamente.
 
 ## 📂 Estructura
 

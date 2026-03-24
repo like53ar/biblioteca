@@ -44,7 +44,7 @@ echo.
 echo ✅ Ambos servicios están iniciando...
 echo.
 echo 📚 Backend: http://localhost:3000
-echo 🌐 Frontend: http://localhost:4200
+echo 🌐 Frontend: http://localhost:4300
 echo.
 echo Esperando a que la aplicación esté lista...
 
@@ -54,7 +54,7 @@ timeout /t 5 /nobreak > nul
 REM Abrir el navegador automáticamente
 echo.
 echo 🌐 Abriendo navegador...
-start http://localhost:4200
+start http://localhost:4300
 
 echo.
 echo ✅ ¡Aplicación iniciada!

@@ -65,7 +65,7 @@ WshShell.Run "cmd /c cd /d """ & scriptPath & "\angular-app"" && npm start", 0, 
 WScript.Sleep 5000
 
 ' Abrir el navegador
-WshShell.Run "http://localhost:4200", 1, False
+WshShell.Run "http://localhost:4300", 1, False
 
 ' Esperar un poco más y eliminar archivo temporal
 WScript.Sleep 1000
