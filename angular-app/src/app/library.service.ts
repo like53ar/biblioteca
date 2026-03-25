@@ -12,6 +12,7 @@ export class LibraryService {
     private http = inject(HttpClient);
     private storage = inject(StorageService);
     private booksSignal = signal<Book[]>([]);
+    public isLoaded = signal(false);
 
     public books = computed(() => this.booksSignal());
 
@@ -24,11 +25,13 @@ export class LibraryService {
             const backendBooks = await firstValueFrom(this.http.get<Book[]>(this.API_URL));
             this.booksSignal.set(backendBooks || []);
             await this.storage.saveBooks(backendBooks || []);
+            this.isLoaded.set(true); // Allow app to show data while metadata repairs happen in background
             await this.repairBookMetadata();
         } catch (error) {
             console.error('❌ Error conectando con el servidor. Cargando desde IndexedDB.', error);
             const localBooks = await this.storage.getAllBooks();
             this.booksSignal.set(localBooks || []);
+            this.isLoaded.set(true);
         }
     }
 

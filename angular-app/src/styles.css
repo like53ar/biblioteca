@@ -21,8 +21,8 @@
     --border-hairline: 1px solid rgba(255, 255, 255, 0.05);
 
     /* Espaciado Maestro Zen Compacto */
-    --master-gap: 1.5rem;
-    --label-input-gap: 0.4rem;
+    --master-gap: 1.25rem;
+    --label-input-gap: 0.3rem;
 
     --radius-luxe: 24px;
 }
@@ -41,8 +41,8 @@ body {
     /* Fallback */
     background-attachment: fixed;
     color: var(--text-primary);
-    line-height: 1.6;
-    padding: 4rem 1.5rem;
+    line-height: 1.4;
+    padding: 1.5rem 1.5rem;
     overflow-x: hidden;
 }
 
@@ -63,19 +63,19 @@ h1,
 
 header {
     text-align: center;
-    margin-bottom: 3rem;
+    margin-bottom: 2rem;
 }
 
 header h1 {
-    font-size: 3.5rem;
+    font-size: 2.2rem;
     font-weight: 400;
-    margin-bottom: 1rem;
+    margin-bottom: 0.25rem;
     color: var(--text-primary);
     text-shadow: 0 4px 10px rgba(0, 0, 0, 0.5);
 }
 
 header p {
-    font-size: 1.1rem;
+    font-size: 1rem;
     color: var(--text-secondary);
     font-style: italic;
     opacity: 0.7;
@@ -85,10 +85,10 @@ header p {
 .zen-form-container {
     background: var(--surface-zen);
     border-radius: var(--radius-luxe);
-    padding: 1.5rem 2.5rem;
+    padding: 0.75rem 1.5rem;
     box-shadow: 0 40px 100px rgba(0, 0, 0, 0.5);
     border: var(--border-hairline);
-    margin-bottom: 3rem;
+    margin-bottom: 1.5rem;
     backdrop-filter: blur(20px);
 
     /* Constrain the form width */
@@ -263,26 +263,7 @@ input[type="checkbox"] {
     margin-bottom: 1rem;
 }
 
-.stats-zen {
-    position: fixed;
-    right: 30px;
-    top: 30px;
-    font-size: 0.85rem;
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 0.15em;
-    color: var(--accent);
-    background: var(--surface-zen);
-    padding: 0.8rem 1.2rem;
-    border: 1px solid var(--accent-soft);
-    border-radius: 100px;
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
-    white-space: nowrap;
-    z-index: 1000;
-    pointer-events: auto;
-    backdrop-filter: blur(10px);
-    border-left: 4px solid var(--accent);
-}
+/* Removed fixed stats-zen to avoid cutoffs on small viewports */
 
 .search-zen {
     width: 100%;

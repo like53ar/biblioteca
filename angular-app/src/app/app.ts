@@ -9,217 +9,332 @@ import { CommonModule } from '@angular/common';
   standalone: true,
   imports: [FormsModule, CommonModule],
   template: `
-    <div class="zen-wrapper">
-      <div class="stats-zen">
-        Cant. Libros Disponibles: {{ totalBooks() }}
-        <div class="data-actions">
-            <button class="btn-text-zen-small" (click)="uploadInput.click()">Importar JSON</button>
-            <button class="btn-text-zen-small" (click)="exportData('json')">Exportar JSON</button>
-            <button class="btn-text-zen-small" (click)="exportData('csv')">Exportar CSV</button>
-            <button class="btn-text-zen-small" (click)="printStickers()">Imprimir Fichas</button>
+    <div class="zen-wrapper" [class.content-ready]="library.isLoaded()">
+      <div class="splash-screen" [class.hidden]="library.isLoaded()">
+        <div class="initial-loader">
+          <div class="spin"></div>
+          <div class="loading-text">Biblioteca Zen</div>
         </div>
-        <input #uploadInput type="file" (change)="onFileSelected($event)" accept=".json" style="display: none;">
       </div>
-      <header>
-        <h1>Mi Biblioteca</h1>
-        <p>El silencio de los libros es una forma de paz.</p>
-      </header>
 
-      <!-- Panel de Registro Zen -->
-      <section class="zen-form-container">
-        <form (submit)="addBook($event)" class="zen-form">
-          
-          <div class="input-group" [class.zen-loading]="isLoading()">
-            <label for="isbn">Identificador ISBN</label>
-            <div class="isbn-field">
-              <input type="text" #isbnInput id="isbn" name="isbn" [(ngModel)]="formState().isbn" 
-                     (input)="onIsbnInput()" class="zen-input" placeholder="Pulse para escribir...">
-              <button type="button" (click)="manualFetch()" class="btn-zen-sync" title="Buscar en red" style="font-size: 0.85rem; width: auto; height: auto; padding: 0.5rem 1rem; border-radius: 8px;">Buscar</button>
+      <div class="main-content" [class.visible]="library.isLoaded()">
+        <header>
+          <div class="stats-topbar">
+            <span class="count-badge">Libros: {{ totalBooks() }}</span>
+            <div class="actions-group">
+                <button class="btn-text-zen-small" (click)="uploadInput.click()">Importar</button>
+                <button class="btn-text-zen-small" (click)="exportData('json')">Exportar JSON</button>
+                <button class="btn-text-zen-small" (click)="exportData('csv')">Exportar CSV</button>
+                <button class="btn-text-zen-small" (click)="printStickers()">Imprimir Fichas</button>
             </div>
+            <input #uploadInput type="file" (change)="onFileSelected($event)" accept=".json" style="display: none;">
           </div>
+          <h1>Mi Biblioteca</h1>
+          <p>El silencio de los libros es una forma de paz.</p>
+        </header>
 
-          <div class="zen-grid" style="gap: 3rem;">
-            <div class="input-group">
-              <label for="title">Título de la Obra</label>
-              <input type="text" id="title" name="title" [(ngModel)]="formState().title" 
-                     class="zen-input" placeholder="Nombre completo">
+        <!-- Panel de Registro Zen -->
+        <section class="zen-form-container">
+          <form (submit)="addBook($event)" class="zen-form">
+            
+            <div class="input-group" [class.zen-loading]="isLoading()">
+              <label for="isbn">Identificador ISBN</label>
+              <div class="isbn-field" style="gap: 1rem;">
+                <input type="text" #isbnInput id="isbn" name="isbn" [(ngModel)]="formState().isbn" 
+                       (input)="onIsbnInput()" class="zen-input" placeholder="Pulse para escribir...">
+                <button type="button" (click)="manualFetch()" class="btn-zen-sync" title="Buscar en red" style="font-size: 0.85rem; width: auto; height: auto; padding: 0.5rem 1rem; border-radius: 8px;">Buscar</button>
+              </div>
             </div>
-            <div class="input-group">
-              <label for="author">Autoría</label>
-              <input type="text" id="author" name="author" [(ngModel)]="formState().author" 
-                     class="zen-input" placeholder="Persona que escribe">
-            </div>
-          </div>
 
-          <div class="zen-grid" style="grid-template-columns: 0.6fr 1.2fr 0.6fr 1.2fr; gap: 3rem;">
-            <div class="input-group">
-              <label for="pages">Páginas</label>
-              <input type="number" id="pages" name="pages" [(ngModel)]="formState().pages" 
-                     class="zen-input" placeholder="0">
-            </div>
-            <div class="input-group">
-              <label for="genre">Género</label>
-              <select id="genre" name="genre" [(ngModel)]="formState().genre" class="zen-input zen-select">
-                <option value=""></option>
-                @for (g of genres; track g) {
-                  <option [value]="g">{{ g }}</option>
-                }
-              </select>
-            </div>
-            <div class="input-group">
-              <label for="year">Año</label>
-              <input type="number" id="year" name="year" [(ngModel)]="formState().year" 
-                     class="zen-input" placeholder="Ej. 2024">
-            </div>
-            <div class="input-group">
-              <label>Estado y Formato <span style="color: var(--color-accent); font-weight: normal; font-size: 0.85em;">*</span></label>
-              <div class="zen-checkbox">
-                <input type="checkbox" id="read" name="read" [(ngModel)]="formState().read">
-                <span style="font-size: 0.95rem; font-weight: 500;">Leído</span>
+            <div class="zen-grid" style="gap: 1.5rem;">
+              <div class="input-group">
+                <label for="title">Título de la Obra</label>
+                <input type="text" id="title" name="title" [(ngModel)]="formState().title" 
+                       class="zen-input" placeholder="Nombre completo">
               </div>
-              <div class="zen-checkbox">
-                <input type="checkbox" id="borrowed" name="borrowed" [(ngModel)]="formState().borrowed">
-                <span style="font-size: 0.95rem; font-weight: 500;">Prestado</span>
+              <div class="input-group">
+                <label for="author">Autoría</label>
+                <input type="text" id="author" name="author" [(ngModel)]="formState().author" 
+                       class="zen-input" placeholder="Persona que escribe">
               </div>
-               <div style="display: flex; gap: 1rem; margin-top: 0.5rem;">
+            </div>
+
+            <div class="zen-grid" style="grid-template-columns: 0.6fr 1.2fr 0.6fr 1.2fr; gap: 1.5rem;">
+              <div class="input-group">
+                <label for="pages">Páginas</label>
+                <input type="number" id="pages" name="pages" [(ngModel)]="formState().pages" 
+                       class="zen-input" placeholder="0">
+              </div>
+              <div class="input-group">
+                <label for="genre">Género</label>
+                <select id="genre" name="genre" [(ngModel)]="formState().genre" class="zen-input zen-select">
+                  <option value=""></option>
+                  @for (g of genres; track g) {
+                    <option [value]="g">{{ g }}</option>
+                  }
+                </select>
+              </div>
+              <div class="input-group">
+                <label for="year">Año</label>
+                <input type="number" id="year" name="year" [(ngModel)]="formState().year" 
+                       class="zen-input" placeholder="Ej. 2024">
+              </div>
+              <div class="input-group">
+                <label>Estado y Formato <span style="color: var(--color-accent); font-weight: normal; font-size: 0.85em;">*</span></label>
                 <div class="zen-checkbox">
-                    <input type="checkbox" id="isPaper" name="isPaper" [(ngModel)]="formState().isPaper">
-                    <span style="font-size: 0.95rem; font-weight: 500;">Papel</span>
+                  <input type="checkbox" id="read" name="read" [(ngModel)]="formState().read">
+                  <span style="font-size: 0.95rem; font-weight: 500;">Leído</span>
                 </div>
                 <div class="zen-checkbox">
-                    <input type="checkbox" id="isDigital" name="isDigital" [(ngModel)]="formState().isDigital">
-                    <span style="font-size: 0.95rem; font-weight: 500;">Digital</span>
+                  <input type="checkbox" id="borrowed" name="borrowed" [(ngModel)]="formState().borrowed">
+                  <span style="font-size: 0.95rem; font-weight: 500;">Prestado</span>
                 </div>
-              </div>
-            </div>
-          </div>
-
-          @if (!showSummaryField()) {
-            <button type="button" class="btn-zen-secondary" (click)="showSummaryField.set(true)">
-              + Añadir Resumen Personal
-            </button>
-          } @else {
-            <div class="input-group" style="gap: 1rem;">
-              <div style="display: flex; justify-content: space-between; align-items: baseline;">
-                <label for="summary">Resumen Personal</label>
-                <button type="button" class="btn-text-zen" (click)="showSummaryField.set(false)">Ocultar</button>
-              </div>
-              <textarea id="summary" name="summary" [(ngModel)]="formState().summary" 
-                        class="zen-input" placeholder="Escriba aquí..." 
-                        rows="2" style="resize: none; font-size: 1.1rem; line-height: 1.8;"></textarea>
-            </div>
-          }
-
-            <div style="display: flex; gap: 1rem; margin-top: 1.5rem;">
-            <button type="submit" class="btn-zen-action" style="flex: 2; margin-top: 0;">
-              {{ editingBookId() ? 'Actualizar Registro' : 'Incorporar a la Colección' }}
-            </button>
-            @if (editingBookId()) {
-              <button type="button" (click)="cancelEdit()" class="btn-zen-secondary" style="margin-top: 0;">
-                Cancelar
-              </button>
-            } @else {
-               <button type="button" (click)="resetForm()" class="btn-zen-secondary" style="margin-top: 0;">
-                Limpiar
-              </button>
-            }
-          </div>
-        </form>
-      </section>
-
-      <!-- Vista de Biblioteca -->
-      <section class="collection-zen">
-        <h2>La Colección</h2>
-        
-        <input type="text" [ngModel]="searchTerm()" (ngModelChange)="searchTerm.set($event)" 
-               class="search-zen" placeholder="Buscar en el silencio...">
-
-        <div class="book-grid-zen">
-          @for (book of filteredBooks(); track book.id) {
-            <article class="book-item-zen">
-              <div class="item-header">
-                <div style="flex: 1; min-width: 0;">
-                  <h3 style="margin-bottom: 0.5rem;">{{ book.title }}</h3>
-                  <div style="display: flex; flex-wrap: wrap; gap: 0.5rem;">
-                    <span class="badge-zen">
-                      {{ book.read ? 'LEÍDO' : 'PENDIENTE' }}
-                    </span>
-                    @if (book.borrowed) {
-                      <span class="badge-zen" style="border-color: #fca5a5; color: #fca5a5;">
-                        PRESTADO
-                      </span>
-                    }
-                    @if (book.isPaper) {
-                        <span class="badge-zen" style="border-color: #a5f3fc; color: #a5f3fc;">
-                        PAPEL
-                      </span>
-                    }
-                    @if (book.isDigital) {
-                        <span class="badge-zen" style="border-color: #c4b5fd; color: #c4b5fd;">
-                        DIGITAL
-                      </span>
-                    }
+                 <div style="display: flex; gap: 1rem; margin-top: 0.5rem;">
+                  <div class="zen-checkbox">
+                      <input type="checkbox" id="isPaper" name="isPaper" [(ngModel)]="formState().isPaper">
+                      <span style="font-size: 0.95rem; font-weight: 500;">Papel</span>
+                  </div>
+                  <div class="zen-checkbox">
+                      <input type="checkbox" id="isDigital" name="isDigital" [(ngModel)]="formState().isDigital">
+                      <span style="font-size: 0.95rem; font-weight: 500;">Digital</span>
                   </div>
                 </div>
               </div>
-              
-              <div class="item-author">{{ book.author }}</div>
-
-              <div class="item-meta">
-                <span>ISBN <strong>{{ book.isbn }}</strong></span>
-                <span>GÉNERO <strong>{{ book.genre || 'S/D' }}</strong></span>
-                <span>PÁGS <strong>{{ book.pages || 'S/D' }}</strong></span>
-                <span>AÑO DE EDICIÓN <strong>{{ book.year || 'S/D' }}</strong></span>
-              </div>
-
-              @if (book.summary) {
-                <p class="item-summary">{{ book.summary }}</p>
-              }
-
-              <div class="item-actions">
-                <button class="btn-item-action" (click)="editBook(book)">
-                   Ver/Editar
-                </button>
-                <button class="btn-item-action" (click)="library.toggleReadStatus(book.id)">
-                   {{ book.read ? 'Marcar Pendiente' : 'Marcar Leído' }}
-                </button>
-                <button class="btn-item-action" (click)="toggleBorrowed(book)">
-                   {{ book.borrowed ? 'Marcar Devuelto' : 'Marcar Prestado' }}
-                </button>
-                <button class="btn-item-action btn-danger" (click)="library.deleteBook(book.id)">
-                   Eliminar
-                </button>
-              </div>
-            </article>
-          } @empty {
-            <div style="grid-column: 1 / -1; text-align: center; padding: 10rem 0; color: var(--text-muted);">
-              <p style="font-size: 1.2rem; font-style: italic;">La biblioteca está en silencio.</p>
             </div>
-          }
-        </div>
-      </section>
+
+            @if (!showSummaryField()) {
+              <button type="button" class="btn-zen-secondary" (click)="showSummaryField.set(true)">
+                + Añadir Resumen Personal
+              </button>
+            } @else {
+              <div class="input-group" style="gap: 1rem;">
+                <div style="display: flex; justify-content: space-between; align-items: baseline;">
+                  <label for="summary">Resumen Personal</label>
+                  <button type="button" class="btn-text-zen" (click)="showSummaryField.set(false)">Ocultar</button>
+                </div>
+                <textarea id="summary" name="summary" [(ngModel)]="formState().summary" 
+                          class="zen-input" placeholder="Escriba aquí..." 
+                          rows="2" style="resize: none; font-size: 1.1rem; line-height: 1.8;"></textarea>
+              </div>
+            }
+
+              <div style="display: flex; gap: 1rem; margin-top: 1.5rem;">
+              <button type="submit" class="btn-zen-action" style="flex: 2; margin-top: 0;">
+                {{ editingBookId() ? 'Actualizar Registro' : 'Incorporar a la Colección' }}
+              </button>
+              @if (editingBookId()) {
+                <button type="button" (click)="cancelEdit()" class="btn-zen-secondary" style="margin-top: 0;">
+                  Cancelar
+                </button>
+              } @else {
+                 <button type="button" (click)="resetForm()" class="btn-zen-secondary" style="margin-top: 0;">
+                  Limpiar
+                </button>
+              }
+            </div>
+          </form>
+        </section>
+
+        <!-- Vista de Biblioteca -->
+        <section class="collection-zen">
+          <h2>La Colección</h2>
+          
+          <input type="text" [ngModel]="searchTerm()" (ngModelChange)="searchTerm.set($event)" 
+                 class="search-zen" placeholder="Buscar en el silencio...">
+
+          <div class="book-grid-zen">
+            @for (book of filteredBooks(); track book.id) {
+              <article class="book-item-zen">
+                <div class="item-header">
+                  <div style="flex: 1; min-width: 0;">
+                    <h3 style="margin-bottom: 0.5rem;">{{ book.title }}</h3>
+                    <div style="display: flex; flex-wrap: wrap; gap: 0.5rem;">
+                      <span class="badge-zen">
+                        {{ book.read ? 'LEÍDO' : 'PENDIENTE' }}
+                      </span>
+                      @if (book.borrowed) {
+                        <span class="badge-zen" style="border-color: #fca5a5; color: #fca5a5;">
+                          PRESTADO
+                        </span>
+                      }
+                      @if (book.isPaper) {
+                          <span class="badge-zen" style="border-color: #a5f3fc; color: #a5f3fc;">
+                          PAPEL
+                        </span>
+                      }
+                      @if (book.isDigital) {
+                          <span class="badge-zen" style="border-color: #c4b5fd; color: #c4b5fd;">
+                          DIGITAL
+                        </span>
+                      }
+                    </div>
+                  </div>
+                </div>
+                
+                <div class="item-author">{{ book.author }}</div>
+
+                <div class="item-meta">
+                  <span>ISBN <strong>{{ book.isbn }}</strong></span>
+                  <span>GÉNERO <strong>{{ book.genre || 'S/D' }}</strong></span>
+                  <span>PÁGS <strong>{{ book.pages || 'S/D' }}</strong></span>
+                  <span>AÑO DE EDICIÓN <strong>{{ book.year || 'S/D' }}</strong></span>
+                </div>
+
+                @if (book.summary) {
+                  <p class="item-summary">{{ book.summary }}</p>
+                }
+
+                <div class="item-actions">
+                  <button class="btn-item-action" (click)="editBook(book)">
+                     Ver/Editar
+                  </button>
+                  <button class="btn-item-action" (click)="library.toggleReadStatus(book.id)">
+                     {{ book.read ? 'Marcar Pendiente' : 'Marcar Leído' }}
+                  </button>
+                  <button class="btn-item-action" (click)="toggleBorrowed(book)">
+                     {{ book.borrowed ? 'Marcar Devuelto' : 'Marcar Prestado' }}
+                  </button>
+                  <button class="btn-item-action btn-danger" (click)="library.deleteBook(book.id)">
+                     Eliminar
+                  </button>
+                </div>
+              </article>
+            } @empty {
+              <div style="grid-column: 1 / -1; text-align: center; padding: 10rem 0; color: var(--text-muted);">
+                <p style="font-size: 1.2rem; font-style: italic;">La biblioteca está en silencio.</p>
+              </div>
+            }
+          </div>
+        </section>
+      </div>
     </div>
   `,
   styles: [`
-    .data-actions {
-        margin-top: 0.5rem;
+    .stats-topbar {
+        font-family: 'Inter', sans-serif;
         display: flex;
-        gap: 1rem;
-        font-size: 0.8rem;
+        justify-content: center;
+        align-items: center;
+        gap: 1.5rem;
+        margin-bottom: 1.5rem;
+        padding: 0.5rem 1rem;
+        background: rgba(255, 255, 255, 0.03);
+        border-radius: 100px;
+        width: fit-content;
+        margin-left: auto;
+        margin-right: auto;
+        border: 1px solid rgba(255, 255, 255, 0.05);
+    }
+    .count-badge {
+        font-size: 0.7rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+        color: var(--accent);
+        border-right: 1px solid rgba(255, 255, 255, 0.1);
+        padding-right: 1.5rem;
+    }
+    .actions-group {
+        display: flex;
+        gap: 1.25rem;
     }
     .btn-text-zen-small {
         background: none;
         border: none;
-        color: var(--text-primary);
+        color: var(--accent); /* Changed from primary to accent for better visibility */
         cursor: pointer;
         padding: 0;
-        text-decoration: underline;
-        opacity: 0.9;
-        transition: opacity 0.2s, color 0.2s;
+        text-decoration: none;
+        font-size: 0.75rem;
+        font-weight: 500;
+        opacity: 0.8;
+        transition: all 0.2s;
+        border-bottom: 1px solid transparent;
     }
     .btn-text-zen-small:hover {
         opacity: 1;
-        color: var(--accent);
+        border-bottom-color: var(--accent);
+    }
+
+    /* Splash Screen & Transition Styles */
+    .splash-screen {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100vw;
+        height: 100vh;
+        background: #0f0f10; /* Match index.html background */
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        z-index: 9999;
+        transition: opacity 0.8s cubic-bezier(0.4, 0, 0.2, 1), visibility 0.8s;
+    }
+    
+    .initial-loader {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 20px;
+    }
+
+    .spin {
+        width: 30px; /* Reduced from 40 */
+        height: 30px;
+        border: 2px solid rgba(129, 140, 248, 0.2);
+        border-top-color: #818cf8;
+        border-radius: 50%;
+        animation: rotate 1s linear infinite;
+    }
+
+    @keyframes rotate { to { transform: rotate(360deg); } }
+
+    .loading-text {
+        font-weight: 300;
+        letter-spacing: 0.25em;
+        text-transform: uppercase;
+        font-size: 0.7rem; /* Reduced from 0.8 */
+        opacity: 0.7;
+    }
+
+    @media (max-width: 768px) {
+        .stats-topbar {
+            flex-direction: column;
+            border-radius: 12px;
+            gap: 1rem;
+            width: 100%;
+        }
+        .count-badge {
+            border-right: none;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            padding-right: 0;
+            padding-bottom: 0.5rem;
+            width: 100%;
+            text-align: center;
+        }
+        .actions-group {
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 0.75rem;
+        }
+    }
+
+    .main-content {
+        opacity: 0;
+        transform: translateY(10px);
+        transition: opacity 1s ease 0.2s, transform 1s ease 0.2s;
+        visibility: hidden;
+    }
+
+    .main-content.visible {
+        opacity: 1;
+        transform: translateY(0);
+        visibility: visible;
+    }
+
+    .zen-wrapper.content-ready .splash-screen {
+        opacity: 0;
+        visibility: hidden;
     }
   `],
 })
