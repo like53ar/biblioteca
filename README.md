@@ -65,8 +65,9 @@ La Biblioteca Zen está diseñada para ser tu santuario de lectura y de gestión
 ### 5. Inmunidad de Lectura Original
 - Protecciones internas impiden que traductores web (como Google Translate) traduzcan equivocadamente los títulos extranjeros originales en la colección.
 
-### 6. Noticias Literarias (NOVEDAD)
-- Tienes acceso inmediato a una barra lateral izquierda con noticias y portales (Agenda Editorial, Estandarte, Cámara Argentina del Libro) para que te mantengas informado sobre próximos lanzamientos y ferias literarias sin salir de tu biblioteca.
+### 6. Noticias Literarias y Repositorios API (NOVEDAD)
+- Tienes acceso inmediato a una barra lateral **derecha** con noticias y portales (Agenda Editorial, Estandarte, Cámara Argentina del Libro) para que te mantengas informado sobre próximos lanzamientos y ferias literarias sin salir de tu biblioteca.
+- Además de canales tradicionales, se integran repositorios técnicos (APITube News API, NewsAPI.org y Zyla API Hub) ideales para extraer análisis temático y consolidar volúmenes masivos de datos para investigación en la literatura.
 
 ---
 
