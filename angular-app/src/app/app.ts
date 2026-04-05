@@ -19,27 +19,6 @@ import { CommonModule } from '@angular/common';
 
       <div class="main-content" [class.visible]="library.isLoaded()">
         <div class="content-layout">
-          <!-- Sidebar: Noticias Literarias -->
-          <aside class="zen-sidebar">
-            <h3 class="sidebar-title">Noticias Literarias</h3>
-            <p class="sidebar-subtitle">Agenda cultural y titulares</p>
-            
-            <div class="news-source">
-                <h4><a href="https://www.agendaeditorial.com/" target="_blank" translate="no">Agenda Editorial</a></h4>
-                <p>Novedades de editoriales, premios literarios y efemérides.</p>
-            </div>
-            
-            <div class="news-source">
-                <h4><a href="https://camaradellibro.com.ar/" target="_blank" translate="no">Cámara Argentina del Libro</a></h4>
-                <p>Calendario oficial de ferias nacionales y eventos culturales.</p>
-            </div>
-            
-            <div class="news-source">
-                <h4><a href="https://www.estandarte.com/" target="_blank" translate="no">Estandarte</a></h4>
-                <p>Noticias de libros, premios, editoriales y reseñas.</p>
-            </div>
-          </aside>
-
           <!-- Columna Principal -->
           <div class="main-column">
             <header>
@@ -231,6 +210,41 @@ import { CommonModule } from '@angular/common';
           </div>
         </section>
           </div> <!-- Cierre main-column -->
+
+          <!-- Sidebar Derecha: Noticias Literarias y APIs -->
+          <aside class="zen-sidebar">
+            <h3 class="sidebar-title">Noticias Literarias</h3>
+            <p class="sidebar-subtitle">Agenda cultural y titulares</p>
+            
+            <!-- Canales Tradicionales -->
+            <div class="news-source">
+                <h4><a href="https://www.agendaeditorial.com/" target="_blank" translate="no">Agenda Editorial</a></h4>
+                <p>Novedades de editoriales, premios literarios y efemérides.</p>
+            </div>
+            <div class="news-source">
+                <h4><a href="https://camaradellibro.com.ar/" target="_blank" translate="no">Cámara Arg. del Libro</a></h4>
+                <p>Calendario oficial de ferias nacionales y eventos culturales.</p>
+            </div>
+            <div class="news-source">
+                <h4><a href="https://www.estandarte.com/" target="_blank" translate="no">Estandarte</a></h4>
+                <p>Noticias de libros, premios, editoriales y reseñas.</p>
+            </div>
+
+            <h3 class="sidebar-title" style="margin-top: 0.5rem; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 1rem;">Repositorios API</h3>
+            
+            <div class="news-source">
+                <h4><a href="https://apitube.io/" target="_blank" translate="no">APITube News API</a></h4>
+                <p>Filtrado por "literatura", extracción de entidades. Ideal análisis contextual.</p>
+            </div>
+            <div class="news-source">
+                <h4><a href="https://newsapi.org/" target="_blank" translate="no">NewsAPI.org (MCP)</a></h4>
+                <p>Búsqueda por categorías, fechas y fuentes. Titulares mundiales.</p>
+            </div>
+            <div class="news-source">
+                <h4><a href="https://zylalabs.com/" target="_blank" translate="no">Zyla API Hub</a></h4>
+                <p>Acceso tiempo real, feed readers para normalizar datos RSS.</p>
+            </div>
+          </aside>
         </div> <!-- Cierre content-layout -->
       </div>
     </div>

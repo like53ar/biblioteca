@@ -535,6 +535,8 @@ input[type="checkbox"] {
     border: var(--border-hairline);
     backdrop-filter: blur(20px);
     height: fit-content;
+    max-height: calc(100vh - 4rem);
+    overflow-y: auto;
     position: sticky;
     top: 2rem;
     display: flex;
