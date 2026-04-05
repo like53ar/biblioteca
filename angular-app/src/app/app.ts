@@ -18,8 +18,32 @@ import { CommonModule } from '@angular/common';
       </div>
 
       <div class="main-content" [class.visible]="library.isLoaded()">
-        <header>
-          <div class="stats-topbar">
+        <div class="content-layout">
+          <!-- Sidebar: Noticias Literarias -->
+          <aside class="zen-sidebar">
+            <h3 class="sidebar-title">Noticias Literarias</h3>
+            <p class="sidebar-subtitle">Agenda cultural y titulares</p>
+            
+            <div class="news-source">
+                <h4><a href="https://www.agendaeditorial.com/" target="_blank" translate="no">Agenda Editorial</a></h4>
+                <p>Novedades de editoriales, premios literarios y efemérides.</p>
+            </div>
+            
+            <div class="news-source">
+                <h4><a href="https://camaradellibro.com.ar/" target="_blank" translate="no">Cámara Argentina del Libro</a></h4>
+                <p>Calendario oficial de ferias nacionales y eventos culturales.</p>
+            </div>
+            
+            <div class="news-source">
+                <h4><a href="https://www.estandarte.com/" target="_blank" translate="no">Estandarte</a></h4>
+                <p>Noticias de libros, premios, editoriales y reseñas.</p>
+            </div>
+          </aside>
+
+          <!-- Columna Principal -->
+          <div class="main-column">
+            <header>
+              <div class="stats-topbar">
             <span class="count-badge">Libros: {{ totalBooks() }}</span>
             <div class="actions-group">
                 <button class="btn-text-zen-small" (click)="uploadInput.click()">Importar</button>
@@ -206,6 +230,8 @@ import { CommonModule } from '@angular/common';
             }
           </div>
         </section>
+          </div> <!-- Cierre main-column -->
+        </div> <!-- Cierre content-layout -->
       </div>
     </div>
   `,
