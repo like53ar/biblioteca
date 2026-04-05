@@ -9,7 +9,7 @@
 -   **Diseño Zen**: Interfaz minimalista con modo oscuro/claro y tipografía elegante (*Libre Baskerville*, *Inter*).
 -   **Gestión de Inventario**: Añade, edita y elimina libros con facilidad. Control de estado (Leído/No leído, Prestado).
 -   **Búsqueda Inteligente de ISBN**: Integración con Google Books, Open Library y Crossref para autocompletar metadatos.
--   **Panel de Noticias Literarias (Novedad)**: Barra lateral informativa con enlaces confiables de Estandarte, Agenda Editorial y Cámara Argentina del Libro.
+-   **Panel de Noticias Literarias (Novedad)**: Barra lateral derecha informativa con portales web (Estandarte, Agenda Editorial, Cámara Argentina del Libro) y repositorios API (APITube, NewsAPI, Zyla API Hub).
 -   **Modo Offline (PWA)**: Funciona sin internet gracias a IndexedDB y Service Workers.
 -   **Fichas para Imprimir**: Generador automático de PDF para múltiples etiquetas (105mm x 48mm optimizadas para A4) de los libros físicos.
 -   **Traducción Inmunizada**: Bloqueos activos (`translate="no"`) para proteger el DOM de interrupciones causadas por Google Translate de Chrome.
@@ -102,4 +102,4 @@ Para respaldar tus libros:
 - Espera un poco más (15-20 segundos).
 
 ### El navegador no se abre
-- Abre manualmente: http://localhost:4300
+- Abre manualmente: http://localhost:4333

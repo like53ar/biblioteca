@@ -57,7 +57,7 @@ WshShell.Run "cmd /c cd /d """ & scriptPath & "\server"" && npm start", 0, False
 WScript.Sleep 2000
 
 ' Abrir el navegador
-WshShell.Run "http://localhost:4300", 1, False
+WshShell.Run "http://localhost:4333", 1, False
 
 ' Eliminar archivo temporal
 On Error Resume Next

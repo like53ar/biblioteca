@@ -34,12 +34,12 @@ REM Esperar un momento breve para que el servidor inicie
 timeout /t 1 /nobreak > nul
 
 echo.
-echo ✅ Sistema iniciado en: http://localhost:4300
+echo ✅ Sistema iniciado en: http://localhost:4333
 echo.
 
 REM Abrir el navegador automáticamente
 echo 🌐 Abriendo navegador...
-start http://localhost:4300
+start http://localhost:4333
 
 echo.
 echo ✅ ¡Aplicación lista para usar!
